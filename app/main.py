@@ -37,6 +37,30 @@ def home():
     status_code = status.HTTP_201_CREATED
 )
 def create_user(user_info: UserCreate, database: Annotated[Session, Depends(get_database)]):
+    result = database.execute(
+        select(models.User)
+        .where(models.User.username == user_info.username)
+    )
+    existing_username = result.scalars().first()
+
+    if existing_username:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = f"username '{user_info.username}' already exists"
+        )
+    
+    result = database.execute(
+        select(models.User)
+        .where(models.User.email == user_info.email)
+    )
+    existing_email = result.scalars().first()
+
+    if existing_email:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = f"email '{user_info.email}' already exists"
+        )
+
     new_user = models.User(
         username = user_info.username,
         email = user_info.email,
@@ -86,6 +110,32 @@ def update_user(user_id: int, updated_info: UserUpdate, database: Annotated[Sess
             status_code = status.HTTP_404_NOT_FOUND,
             detail = f"user with ID of {user_id} not found"
         )
+    
+    if updated_info.username is not None:
+        result = database.execute(
+            select(models.User)
+            .where(models.User.username == updated_info.username)
+        )
+        existing_username = result.scalars().first()
+
+        if existing_username:
+            raise HTTPException(
+                status_code = status.HTTP_400_BAD_REQUEST,
+                detail = f"username '{updated_info.username}' already exists"
+            )
+    
+    if updated_info.email is not None:
+        result = database.execute(
+            select(models.User)
+            .where(models.User.email == updated_info.email)
+        )
+        existing_email = result.scalars().first()
+
+        if existing_email:
+            raise HTTPException(
+                status_code = status.HTTP_400_BAD_REQUEST,
+                detail = f"email '{updated_info.email}' already exists"
+            )
 
     update_data = updated_info.model_dump(exclude_unset = True)
 
