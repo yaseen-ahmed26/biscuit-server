@@ -1,5 +1,6 @@
 # ------- IMPORTS -------
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 
 from contextlib import asynccontextmanager
@@ -24,6 +25,18 @@ app.include_router(
     users.router, 
     prefix = "/api/users",
     tags = ["users"]
+)
+
+origns = [
+    "http://127.0.0.1:5500"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origns,
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"]
 )
 
 # Dark Mode
