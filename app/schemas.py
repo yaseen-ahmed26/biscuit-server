@@ -17,9 +17,12 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str = Field(min_length = 8)
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
     username: str | None = Field(default = None, min_length = 1, max_length = 30)
     email: EmailStr | None = Field(default = None, max_length = 60)
+
+    password: str | None = Field(default = None, min_length = 8)
+    current_password: str | None = Field(default = None)
 
 class UserPublic(BaseModel):
     model_config = ConfigDict(from_attributes = True)

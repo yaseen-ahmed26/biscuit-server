@@ -48,7 +48,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 **Password Hashing**: Scramble the password with a unique salt for every different password (even if the password itself is the same)
 
 ---
-### ERROR CODES
+### HTTP CODES
 **200**: (Success) General request was successful
 
 **201**: (Success) A new resource was created
@@ -69,6 +69,9 @@ This is some personal notes based off the project. Mix of what things mean, what
 ### (FIXED) ISSUES
 1. Type Errors
 In schemas.py, the created_at for all schemas was set to a string, rather than a datetime object itself. Caused the request to fail (500 internal server error) because I was doing .datetime.today() on a field that required a string.
+
+2. UserUpdate Schema Inheritence
+The UserUpdate schema was inheriting from UserBase, which UserUpdate overrode(?) those field anyways. Caused weird issues in the Swagger docs like missing fields. So it was changed to just inherit from BaseMOdel.
 
 ---
 ### NOTES

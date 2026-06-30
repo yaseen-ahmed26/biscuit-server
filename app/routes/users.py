@@ -158,6 +158,21 @@ async def update_user(
             detail = f"user with ID '{user_id}' not found"
         )
     
+    if updated_info.password is not None:
+        if not updated_info.current_password:
+            raise HTTPException(
+                status_code = status.HTTP_400_BAD_REQUEST,
+                detail = "current password is required to change your password"
+            )
+        
+        if not verify_password(updated_info.current_password, user.password_hash):
+            raise HTTPException(
+                status_code = status.HTTP_401_UNAUTHORIZED,
+                detail = "incorrect password"
+            )
+        
+        user.password_hash = hash_password(updated_info.password)
+    
     if updated_info.username is not None and updated_info.username != user.username:
         result = await database.execute(
             select(models.User)
@@ -170,6 +185,8 @@ async def update_user(
                 status_code = status.HTTP_400_BAD_REQUEST,
                 detail = f"username '{updated_info.username}' already exists"
             )
+        
+        user.username = updated_info.username
     
     if updated_info.email is not None and updated_info.email != user.email:
         result = await database.execute(
@@ -184,10 +201,7 @@ async def update_user(
                 detail = f"email '{updated_info.email}' already exists"
             )
 
-    update_data = updated_info.model_dump(exclude_unset = True)
-
-    for field, value in update_data.items():
-        setattr(user, field, value)
+        user.email = updated_info.email
 
     await database.commit()
     await database.refresh(user)
