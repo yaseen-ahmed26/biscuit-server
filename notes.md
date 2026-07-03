@@ -23,6 +23,8 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 **Pyjwt**: Library recommended to use with FastAPI, simple and focused for JWT tokens.
 
+**Nanoid**: Used to generate short codes and IDs.
+
 ---
 ### JARGON
 **API (Application Programming Interface)**: The 'waiter' (FastAPI) between the 'kitchen' (database) and the 'customer' (the client, e.g. web, mobile, game)
@@ -81,6 +83,12 @@ Dependency Injections only work with HTTP requests and websockets, you can't do 
 4. Failing to connect to the websocket
 The original apporach was for the connection manager to be a list of websockets. This would've been fine if it was a global chat or multiplayer game, but because we only want to log in the user on 1 client, it was changed to a dictionary of websockets, each with it's own unique session ID.
 
+5. Cleanup when the websocket closes unexpectedly
+If the user closes their game, it does not remove the database row, meaning it is left behind forever. The fix was to just clean it up in the finally block of the websocket.
+
+6. Not checking if the new user/email is the same as the old
+Somehow this broke, not sure why. It wasn't checking if the old username is the same as the new one.
+
 ---
 ### NOTES
 - There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.
@@ -91,6 +99,7 @@ The original apporach was for the connection manager to be a list of websockets.
 - For security, don't reveal what went wrong when failing to login. Don't which is incorrect (password or email). Or just lie and say the password is incorrect when its the email.
 - Best practise to organise routes, with paramiticised ones at the end.
 - You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
+- You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distingush the difference. This is also standard practicse.
 
 ---
 ### MISC

@@ -140,6 +140,8 @@ async def update_user(
     current_user: CurrentUser,
     database: Annotated[AsyncSession, Depends(get_database)]
 ):
+    print(updated_info)
+
     if user_id != current_user.id:
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
@@ -158,22 +160,31 @@ async def update_user(
             detail = f"user with ID '{user_id}' not found"
         )
     
+    if not updated_info.current_password:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "current password is required to change your password"
+        )
+        
+    if not verify_password(updated_info.current_password, user.password_hash):
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "incorrect password"
+        )
+    
     if updated_info.password is not None:
-        if not updated_info.current_password:
-            raise HTTPException(
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = "current password is required to change your password"
-            )
-        
-        if not verify_password(updated_info.current_password, user.password_hash):
-            raise HTTPException(
-                status_code = status.HTTP_401_UNAUTHORIZED,
-                detail = "incorrect password"
-            )
-        
         user.password_hash = hash_password(updated_info.password)
     
-    if updated_info.username is not None and updated_info.username != user.username:
+    if updated_info.username is not None:
+        print(updated_info.username)
+        print(user.username)
+
+        if updated_info.username == user.username:
+            raise HTTPException(
+                status_code = status.HTTP_400_BAD_REQUEST,
+                detail = f"username cannot be the same as your current one"
+            )
+
         result = await database.execute(
             select(models.User)
             .where(models.User.username == updated_info.username)
@@ -188,7 +199,13 @@ async def update_user(
         
         user.username = updated_info.username
     
-    if updated_info.email is not None and updated_info.email != user.email:
+    if updated_info.email is not None:
+        if updated_info.email == user.email:
+            raise HTTPException(
+                status_code = status.HTTP_400_BAD_REQUEST,
+                detail = f"email cannot be the same as your current one"
+            )
+
         result = await database.execute(
             select(models.User)
             .where(models.User.email == updated_info.email)
