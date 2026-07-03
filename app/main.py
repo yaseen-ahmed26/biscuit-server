@@ -5,9 +5,8 @@ from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 
 from contextlib import asynccontextmanager
 
-from app.routes import codes
 from database import Base, engine
-from routes import users
+from routes import users, codes
 
 # ------- SETUP -------
 @asynccontextmanager
