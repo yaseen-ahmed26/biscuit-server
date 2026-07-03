@@ -17,3 +17,10 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(60), unique = True, nullable = False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable = False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), default = lambda: datetime.now(UTC))
+
+class Codes(Base):
+    __tablename__ = "codes"
+
+    session_id: Mapped[str] = mapped_column(String, primary_key = True, index = True)
+    login_code: Mapped[str] = mapped_column(String, unique = True, nullable = False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), nullable = False)

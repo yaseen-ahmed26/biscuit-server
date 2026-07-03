@@ -38,3 +38,10 @@ class UserPrivate(UserPublic):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class Code(BaseModel):
+    code: str = Field(min_length = 7, max_length = 7)
+
+class CodeResponse(BaseModel):
+    session_id: str
+    login_code: str
