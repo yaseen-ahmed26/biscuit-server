@@ -1,6 +1,6 @@
 from fastapi import status, HTTPException, Depends, APIRouter, WebSocket, WebSocketDisconnect
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,7 @@ from database import get_database
 import models
 
 from auth import CurrentUser
+from helpers import generate_id
 
 # ------- SETUP -------
 router = APIRouter()
@@ -37,8 +38,21 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 # ------- HELPERS -------
-async def generate_websocket_info(database):
-    return "ABCD123", "ABCJF83893K43", datetime.now()
+async def generate_websocket_info(database: AsyncSession):
+    session_id = generate_id(21)
+    login_code = generate_id(7)
+    expires_at = datetime.now(UTC) + timedelta(minutes = 2)
+
+    new_code = models.Codes(
+        session_id = session_id,
+        login_code = login_code,
+        expires_at = expires_at
+    )
+
+    database.add(new_code)
+    await database.commit()
+
+    return session_id, login_code, expires_at
 
 # ------- ENDPOINTS -------
 @router.websocket(
@@ -52,7 +66,7 @@ async def start_websocket(
     conncted = False
 
     try:
-        login_code, session_id, expires_at = await generate_websocket_info(database)
+        session_id, login_code, expires_at = await generate_websocket_info(database)
 
         await manager.connect(session_id, websocket)
         conncted = True
@@ -72,6 +86,17 @@ async def start_websocket(
     finally:
         if conncted and session_id is not None:
             manager.disconnect(session_id)     
+
+        if session_id is not None:
+            result = await database.execute(
+                select(models.Codes)
+                .where(models.Codes.session_id == session_id)
+            )
+            existing_code = result.scalars().first()
+
+            if existing_code:
+                await database.delete(existing_code)
+                await database.commit()
 
 @router.post(
     "/verify", 
