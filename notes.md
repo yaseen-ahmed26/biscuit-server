@@ -47,6 +47,8 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 **Password Hashing**: Scramble the password with a unique salt for every different password (even if the password itself is the same)
 
+**Websockets**: A way to have 2 way persistent communication between the client and server. With regular HTTP request, it can only be inititated by the client
+
 ---
 ### HTTP CODES
 **200**: (Success) General request was successful
@@ -73,6 +75,12 @@ In schemas.py, the created_at for all schemas was set to a string, rather than a
 2. UserUpdate Schema Inheritence
 The UserUpdate schema was inheriting from UserBase, which UserUpdate overrode(?) those field anyways. Caused weird issues in the Swagger docs like missing fields. So it was changed to just inherit from BaseMOdel.
 
+3. Incorrect Dependency Injections
+Dependency Injections only work with HTTP requests and websockets, you can't do it on good old helper functions. So just inject it in the websocket endpoint.
+
+4. Failing to connect to the websocket
+The original apporach was for the connection manager to be a list of websockets. This would've been fine if it was a global chat or multiplayer game, but because we only want to log in the user on 1 client, it was changed to a dictionary of websockets, each with it's own unique session ID.
+
 ---
 ### NOTES
 - There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.
@@ -82,6 +90,7 @@ The UserUpdate schema was inheriting from UserBase, which UserUpdate overrode(?)
 - Difference between encryption and hashing is that the former is reversable, the latter is not. Argon2 generates a differnt salt for every password, the same password can have differnt hashes.
 - For security, don't reveal what went wrong when failing to login. Don't which is incorrect (password or email). Or just lie and say the password is incorrect when its the email.
 - Best practise to organise routes, with paramiticised ones at the end.
+- You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
 
 ---
 ### MISC
