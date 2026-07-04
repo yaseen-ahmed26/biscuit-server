@@ -10,6 +10,7 @@ from pydantic import (
 from datetime import datetime
 
 # ------- SCHEMAS -------
+# Users
 class UserBase(BaseModel):
     username: str = Field(min_length = 1, max_length = 30)
     email: EmailStr = Field(max_length = 60)
@@ -33,15 +34,27 @@ class UserPublic(BaseModel):
 
 class UserPrivate(UserPublic):
     email: str
-    created_at: datetime
+
+class UserSave(UserPrivate):
+    save: "SaveBase"
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+# Codes
 class Code(BaseModel):
     code: str = Field(min_length = 7, max_length = 7)
 
 class CodeResponse(BaseModel):
     session_id: str
     login_code: str
+
+# Saves
+class SaveBase(BaseModel):
+    model_config = ConfigDict(from_attributes = True)
+
+    level: int
+    local_id: str = Field(min_length = 32, max_length = 32)
+
+UserSave.model_rebuild()
