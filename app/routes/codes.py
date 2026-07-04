@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import CodeResponse, Code
+from schemas import CodeResponse, Code, WebsocketMetadata
 from database import get_database
 import models
 
@@ -38,7 +38,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 # ------- HELPERS -------
-async def generate_websocket_info(database: AsyncSession):
+async def generate_websocket_info(database: AsyncSession, metadata):
     session_id = generate_id(21)
     login_code = generate_id(7)
     expires_at = datetime.now(UTC) + timedelta(minutes = 2)
@@ -46,7 +46,9 @@ async def generate_websocket_info(database: AsyncSession):
     new_code = models.Codes(
         session_id = session_id,
         login_code = login_code,
-        expires_at = expires_at
+        expires_at = expires_at,
+        os = metadata.os,
+        country = metadata.country
     )
 
     database.add(new_code)
@@ -60,13 +62,14 @@ async def generate_websocket_info(database: AsyncSession):
 )
 async def start_websocket(
     websocket: WebSocket,
-    database: Annotated[AsyncSession, Depends(get_database)]
+    database: Annotated[AsyncSession, Depends(get_database)],
+    metadata: WebsocketMetadata = Depends()
 ):
     session_id = None
     conncted = False
 
     try:
-        session_id, login_code, expires_at = await generate_websocket_info(database)
+        session_id, login_code, expires_at = await generate_websocket_info(database, metadata)
 
         await manager.connect(session_id, websocket)
         conncted = True

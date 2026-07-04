@@ -25,6 +25,8 @@ class Codes(Base):
     session_id: Mapped[str] = mapped_column(String, primary_key = True, index = True)
     login_code: Mapped[str] = mapped_column(String, unique = True, nullable = False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), nullable = False)
+    os: Mapped[str] = mapped_column(String(25), nullable = False)
+    country: Mapped[str] = mapped_column(String(32), nullable = False)
 
 class Save(Base):
     __tablename__ = "saves"

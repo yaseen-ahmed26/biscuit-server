@@ -50,6 +50,10 @@ class CodeResponse(BaseModel):
     session_id: str
     login_code: str
 
+class WebsocketMetadata(BaseModel):
+    os: str | None = Field(default = "Unknown", max_length = 25)
+    country: str | None = Field(default = "Unknown", max_length = 32)
+
 # Saves
 class SaveBase(BaseModel):
     model_config = ConfigDict(from_attributes = True)
