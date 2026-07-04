@@ -8,7 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import UserCreate, UserUpdate, UserPublic, UserPrivate, Token
+from schemas import (
+    UserCreate, 
+    UserUpdate, 
+    UserPublic, 
+    UserPrivate, 
+    UserSave,
+    Token
+)
+
+from helpers import generate_id
+
 from database import get_database
 import models
 
@@ -62,7 +72,7 @@ def get_current_user(current_user: CurrentUser):
 
 @router.post(
     "",
-    response_model = UserPrivate,
+    response_model = UserSave,
     status_code = status.HTTP_201_CREATED
 )
 async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, Depends(get_database)]):
@@ -94,12 +104,18 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
         username = user_info.username,
         email = user_info.email,
         password_hash = hash_password(user_info.password),
-        created_at = datetime.now()
     )
+
+    new_save = models.Save(
+        local_id = generate_id(32),
+        level = 1
+    )
+
+    new_user.save = new_save
 
     database.add(new_user)
     await database.commit()
-    await database.refresh(new_user)
+    await database.refresh(new_user, attribute_names = ["save"])
 
     return new_user
 

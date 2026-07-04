@@ -17,7 +17,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(60), unique = True, nullable = False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable = False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), default = lambda: datetime.now(UTC))
-    save: Mapped["Save"] = relationship(back_populates = "user")
+    save: Mapped["Save"] = relationship(back_populates = "user", cascade = "all, delete-orphan")
 
 class Codes(Base):
     __tablename__ = "codes"

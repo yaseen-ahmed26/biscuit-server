@@ -108,3 +108,6 @@ Run this command in the terminal for a super super secret key.
 
 - JSON Web Tokens (JWT) Structure
 It has 3 parts. (1) Header: contains the algorithm and type. (2) Payload: contains the data and expiration. (3) Signiture: proves the token wasn't tampered with. Signiture is created with our secret key meaning only our server can create valid tokens.
+
+- cascade = "all, delete-orphan"
+Doing this in a relationship tells SQLAlchemy to also delete the associated save data. If then that save data becomes an orphan and isn't connected to a suer, then delete it. Also automagically saves it to the database when a new save is made.
