@@ -33,3 +33,4 @@ class Save(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key = True)
     level: Mapped[int] = mapped_column(Integer, nullable = False)
     user: Mapped[User] = relationship(back_populates = "save")
+    save_id: Mapped[str] = mapped_column(String(32), nullable = False)

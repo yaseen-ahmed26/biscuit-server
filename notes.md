@@ -103,7 +103,7 @@ The websocket did not close because originally, I was only deleting it from Pyth
 - You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distingush the difference. This is also standard practicse.
 - When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
 - session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
-- Removed local_id from saves because it wasn't being used. It will be used for sessions instead.
+- ~~Removed local_id from saves because it wasn't being used. It will be used for sessions instead.~~ Going back to this original idea. Godot will simply store the local_id (now save_id) locally and use that to get the save data when starting up. The downside is there can only be 1 logged in device at a time, later on this'll change to the new sessions idea.
 
 ---
 ### MISC

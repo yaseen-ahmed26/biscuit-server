@@ -60,5 +60,6 @@ class SaveBase(BaseModel):
     model_config = ConfigDict(from_attributes = True)
 
     level: int
+    save_id: str
 
 UserSave.model_rebuild()

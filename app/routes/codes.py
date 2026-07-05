@@ -144,6 +144,7 @@ async def verify(
 
     await manager.send_json_message(existing_code.login_code, {
         "type": "user_data",
+        "save_id": user.save.save_id,
         "username": user.username,
         "save": {
             "level": user.save.level
