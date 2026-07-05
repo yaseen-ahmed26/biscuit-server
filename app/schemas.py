@@ -62,4 +62,7 @@ class SaveBase(BaseModel):
     level: int
     save_id: str
 
+class SaveResponse(SaveBase):
+    pass
+
 UserSave.model_rebuild()
