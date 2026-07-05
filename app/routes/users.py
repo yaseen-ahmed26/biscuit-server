@@ -17,7 +17,13 @@ from schemas import (
     Token
 )
 
-from helpers import generate_id
+from helpers import (
+    generate_id,
+    compare_user_id,
+    get_user_by_id, 
+    check_username_exists,
+    check_email_exists
+)
 
 from database import get_database
 import models
@@ -76,29 +82,8 @@ def get_current_user(current_user: CurrentUser):
     status_code = status.HTTP_201_CREATED
 )
 async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, Depends(get_database)]):
-    result = await database.execute(
-        select(models.User)
-        .where(models.User.username == user_info.username)
-    )
-    existing_username = result.scalars().first()
-
-    if existing_username:
-        raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail = f"username '{user_info.username}' already exists"
-        )
-    
-    result = await database.execute(
-        select(models.User)
-        .where(models.User.email == user_info.email)
-    )
-    existing_email = result.scalars().first()
-
-    if existing_email:
-        raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail = f"email '{user_info.email}' already exists"
-        )
+    await check_username_exists(user_info.username, database)
+    await check_email_exists(user_info.email, database)
 
     new_user = models.User(
         username = user_info.username,
@@ -124,23 +109,8 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
     status_code = status.HTTP_204_NO_CONTENT
 )
 async def delete_user(user_id: int, current_user: CurrentUser, database: Annotated[AsyncSession, Depends(get_database)]):
-    if user_id != current_user.id:
-        raise HTTPException(
-            status_code = status.HTTP_403_FORBIDDEN,
-            detail = "not authorised to delete this user"
-        )
-    
-    result = await database.execute(
-        select(models.User)
-        .where(models.User.id == user_id)
-    )
-    user = result.scalars().first()
-
-    if not user:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = f"user with ID '{user_id}' not found"
-        )
+    await compare_user_id(user_id, current_user.id)
+    user = await get_user_by_id(user_id, database)
     
     await database.delete(user)
     await database.commit()
@@ -156,25 +126,8 @@ async def update_user(
     current_user: CurrentUser,
     database: Annotated[AsyncSession, Depends(get_database)]
 ):
-    print(updated_info)
-
-    if user_id != current_user.id:
-        raise HTTPException(
-            status_code = status.HTTP_403_FORBIDDEN,
-            detail = "not authorised to update this user"
-        )
-
-    result = await database.execute(
-        select(models.User)
-        .where(models.User.id == user_id)
-    )
-    user = result.scalars().first()
-
-    if not user:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = f"user with ID '{user_id}' not found"
-        )
+    await compare_user_id(user_id, current_user.id)
+    user = await get_user_by_id(user_id, database)
     
     if not updated_info.current_password:
         raise HTTPException(
@@ -192,26 +145,13 @@ async def update_user(
         user.password_hash = hash_password(updated_info.password)
     
     if updated_info.username is not None:
-        print(updated_info.username)
-        print(user.username)
-
         if updated_info.username == user.username:
             raise HTTPException(
                 status_code = status.HTTP_400_BAD_REQUEST,
                 detail = f"username cannot be the same as your current one"
             )
 
-        result = await database.execute(
-            select(models.User)
-            .where(models.User.username == updated_info.username)
-        )
-        existing_username = result.scalars().first()
-
-        if existing_username:
-            raise HTTPException(
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = f"username '{updated_info.username}' already exists"
-            )
+        await check_username_exists(updated_info.username, database)
         
         user.username = updated_info.username
     
@@ -222,17 +162,7 @@ async def update_user(
                 detail = f"email cannot be the same as your current one"
             )
 
-        result = await database.execute(
-            select(models.User)
-            .where(models.User.email == updated_info.email)
-        )
-        existing_email = result.scalars().first()
-
-        if existing_email:
-            raise HTTPException(
-                status_code = status.HTTP_400_BAD_REQUEST,
-                detail = f"email '{updated_info.email}' already exists"
-            )
+        await check_email_exists(updated_info.email, database)
 
         user.email = updated_info.email
 
@@ -256,15 +186,6 @@ async def get_all_users(database: Annotated[AsyncSession, Depends(get_database)]
     response_model = UserPrivate
 )
 async def get_specific_user(user_id: int, database: Annotated[AsyncSession, Depends(get_database)]):
-    result = await database.execute(
-        select(models.User)
-        .where(models.User.id == user_id)
-    )
-    user = result.scalars().first()
+    user = await get_user_by_id(user_id, database)
 
-    if user: return user
-    
-    raise HTTPException(
-        status_code = status.HTTP_404_NOT_FOUND,
-        detail = f"user with ID '{user_id}' not found"
-    )
+    return user
