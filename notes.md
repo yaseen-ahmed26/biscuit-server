@@ -89,6 +89,9 @@ If the user closes their game, it does not remove the database row, meaning it i
 6. Not checking if the new user/email is the same as the old
 Somehow this broke, not sure why. It wasn't checking if the old username is the same as the new one.
 
+7. Websockets not closing when code is input
+The websocket did not close because originally, I was only deleting it from Python's memory. Must call .close() on the websocket to close it. This is also async so must be done with async def/await.
+
 ---
 ### NOTES
 - There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.

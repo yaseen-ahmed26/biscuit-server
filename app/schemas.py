@@ -44,11 +44,13 @@ class Token(BaseModel):
 
 # Codes
 class Code(BaseModel):
-    code: str = Field(min_length = 7, max_length = 7)
+    login_code: str = Field(min_length = 7, max_length = 7)
 
 class CodeResponse(BaseModel):
     session_id: str
     login_code: str
+    os: str
+    country: str
 
 class WebsocketMetadata(BaseModel):
     os: str | None = Field(default = "Unknown", max_length = 25)
