@@ -103,6 +103,7 @@ The websocket did not close because originally, I was only deleting it from Pyth
 - Best practise to organise routes, with paramiticised ones at the end.
 - You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
 - You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distingush the difference. This is also standard practicse.
+- When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
 
 ---
 ### MISC

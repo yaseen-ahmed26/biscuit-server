@@ -26,8 +26,15 @@ class ConnectionManager:
         await websocket.accept(headers = None)
         self.active_connections[session_id] = websocket
 
-    def disconnect(self, session_id: str):
+    async def disconnect(self, session_id: str):
         if session_id in self.active_connections:
+            websocket = self.active_connections[session_id]
+
+            try:
+                await websocket.close()
+            except Exception as error:
+                print(f"An error occurred closing the websocket: {error}")
+
             del self.active_connections[session_id]
 
     async def send_text_message(self, session_id, message: str):
@@ -95,7 +102,7 @@ async def start_websocket(
         print(f"An error occurred: {error}")
     finally:
         if conncted and session_id is not None:
-            manager.disconnect(session_id)     
+            await manager.disconnect(session_id)     
 
         if session_id is not None:
             result = await database.execute(
@@ -144,9 +151,6 @@ async def verify(
             "level": user.save.level
         }
     })
-    manager.disconnect(existing_code.session_id)
-
-    await database.delete(existing_code)
-    await database.commit()
+    await manager.disconnect(existing_code.session_id)
         
     return existing_code
