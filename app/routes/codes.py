@@ -15,6 +15,8 @@ import models
 from auth import CurrentUser
 from helpers import generate_id
 
+import asyncio
+
 # ------- SETUP -------
 router = APIRouter()
 
@@ -22,29 +24,27 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[str, WebSocket] = {}
 
-    async def connect(self, session_id, websocket: WebSocket):
+    async def connect(self, login_code, websocket: WebSocket):
         await websocket.accept(headers = None)
-        self.active_connections[session_id] = websocket
+        self.active_connections[login_code] = websocket
 
-    async def disconnect(self, session_id: str):
-        if session_id in self.active_connections:
-            websocket = self.active_connections[session_id]
+    async def disconnect(self, login_code: str):
+        websocket = self.active_connections.pop(login_code, None)
 
+        if websocket:
             try:
                 await websocket.close()
             except Exception as error:
                 print(f"An error occurred closing the websocket: {error}")
 
-            del self.active_connections[session_id]
-
-    async def send_text_message(self, session_id, message: str):
-        websocket = self.active_connections.get(session_id)
+    async def send_text_message(self, login_code, message: str):
+        websocket = self.active_connections.get(login_code)
 
         if websocket:
             await websocket.send_text(message)
 
-    async def send_json_message(self, session_id, data: str):
-        websocket = self.active_connections.get(session_id)
+    async def send_json_message(self, login_code, data: str):
+        websocket = self.active_connections.get(login_code)
 
         if websocket:
             await websocket.send_json(data)
@@ -53,12 +53,10 @@ manager = ConnectionManager()
 
 # ------- HELPERS -------
 async def generate_websocket_info(database: AsyncSession, metadata):
-    session_id = generate_id(21)
     login_code = generate_id(7)
     expires_at = datetime.now(UTC) + timedelta(minutes = 2)
 
     new_code = models.Codes(
-        session_id = session_id,
         login_code = login_code,
         expires_at = expires_at,
         os = metadata.os,
@@ -68,7 +66,7 @@ async def generate_websocket_info(database: AsyncSession, metadata):
     database.add(new_code)
     await database.commit()
 
-    return session_id, login_code, expires_at
+    return login_code, expires_at
 
 # ------- ENDPOINTS -------
 @router.websocket(
@@ -79,18 +77,18 @@ async def start_websocket(
     database: Annotated[AsyncSession, Depends(get_database)],
     metadata: WebsocketMetadata = Depends()
 ):
-    session_id = None
+    login_code = None
     conncted = False
 
     try:
-        session_id, login_code, expires_at = await generate_websocket_info(database, metadata)
+        login_code, expires_at = await generate_websocket_info(database, metadata)
 
-        await manager.connect(session_id, websocket)
+        await manager.connect(login_code, websocket)
         conncted = True
 
-        await manager.send_json_message(session_id, {
+        await manager.send_json_message(login_code, {
+            "type": "information",
             "login_code": login_code,
-            "session_id": session_id
         })
 
         while True:
@@ -101,13 +99,13 @@ async def start_websocket(
     except Exception as error:
         print(f"An error occurred: {error}")
     finally:
-        if conncted and session_id is not None:
-            await manager.disconnect(session_id)     
+        if conncted and login_code is not None:
+            await manager.disconnect(login_code)     
 
-        if session_id is not None:
+        if login_code is not None:
             result = await database.execute(
                 select(models.Codes)
-                .where(models.Codes.session_id == session_id)
+                .where(models.Codes.login_code == login_code)
             )
             existing_code = result.scalars().first()
 
@@ -144,13 +142,14 @@ async def verify(
     )
     user = result.scalars().first()
 
-    await manager.send_json_message(existing_code.session_id, {
+    await manager.send_json_message(existing_code.login_code, {
+        "type": "user_data",
         "username": user.username,
-        "save_id": user.save.local_id,
         "save": {
             "level": user.save.level
         }
     })
-    await manager.disconnect(existing_code.session_id)
+    await asyncio.sleep(0.05)
+    await manager.disconnect(existing_code.login_code)
         
     return existing_code

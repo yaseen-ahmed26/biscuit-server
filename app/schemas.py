@@ -47,7 +47,6 @@ class Code(BaseModel):
     login_code: str = Field(min_length = 7, max_length = 7)
 
 class CodeResponse(BaseModel):
-    session_id: str
     login_code: str
     os: str
     country: str
@@ -61,6 +60,5 @@ class SaveBase(BaseModel):
     model_config = ConfigDict(from_attributes = True)
 
     level: int
-    local_id: str = Field(min_length = 32, max_length = 32)
 
 UserSave.model_rebuild()

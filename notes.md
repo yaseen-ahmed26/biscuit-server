@@ -1,8 +1,6 @@
 # Project Notes
 This is some personal notes based off the project. Mix of what things mean, what different tools I'm using do, analogies etc.
 
-(Previous commits show this empty, originally I was making these notes elsewhere but decided to put them in here instead.)
-
 ---
 ### TOOLS
 **Python**: The programming language
@@ -104,6 +102,8 @@ The websocket did not close because originally, I was only deleting it from Pyth
 - You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
 - You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distingush the difference. This is also standard practicse.
 - When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
+- session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
+- Removed local_id from saves because it wasn't being used. It will be used for sessions instead.
 
 ---
 ### MISC

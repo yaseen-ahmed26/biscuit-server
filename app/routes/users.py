@@ -107,7 +107,6 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
     )
 
     new_save = models.Save(
-        local_id = generate_id(32),
         level = 1
     )
 

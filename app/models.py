@@ -22,8 +22,7 @@ class User(Base):
 class Codes(Base):
     __tablename__ = "codes"
 
-    session_id: Mapped[str] = mapped_column(String, primary_key = True, index = True)
-    login_code: Mapped[str] = mapped_column(String, unique = True, nullable = False)
+    login_code: Mapped[str] = mapped_column(String, unique = True, primary_key = True, index = True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), nullable = False)
     os: Mapped[str] = mapped_column(String(25), nullable = False)
     country: Mapped[str] = mapped_column(String(32), nullable = False)
@@ -33,6 +32,4 @@ class Save(Base):
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key = True)
     level: Mapped[int] = mapped_column(Integer, nullable = False)
-
-    local_id: Mapped[str] = mapped_column(String(32), unique = True, nullable = False)
     user: Mapped[User] = relationship(back_populates = "save")
