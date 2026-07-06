@@ -14,10 +14,10 @@ This is some personal notes based off the project. Mix of what things mean, what
 **Pydantic**: FastAPI data validation for data coming in and going out of the backend
 
 ---
-### PACKAGAES
+### PACKAGES
 **FastAPI, SQLAlchemy**: ^
 
-**Pwdlib (Argon2)**: Used for password hashing. Argon2 is the more modern and more resistant to GPU cracking attacks.
+**Passlib (Argon2)**: Used for password hashing. Argon2 is the more modern and more resistant to GPU cracking attacks.
 
 **Pyjwt**: Library recommended to use with FastAPI, simple and focused for JWT tokens.
 
@@ -27,7 +27,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 ### JARGON
 **API (Application Programming Interface)**: The 'waiter' (FastAPI) between the 'kitchen' (database) and the 'customer' (the client, e.g. web, mobile, game)
 
-**Endpoint**: The location where the backend recieves API calls for data. It is the specific URL and HTTP method (e.g. GET /api/posts)
+**Endpoint**: The location where the backend receives API calls for data. It is the specific URL and HTTP method (e.g. GET /api/posts)
 
 ***ORM (Object Relational Mapping)**: Instead of writing raw prone-to-error SQL, an ORM (in this case, SQLAlchemy) allows for accessing the database record as though they were regular Python objects. 
 
@@ -39,11 +39,11 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 **Session**: A temporary workspace opened to the database for a single request, then is automagically closed
 
-**Authentication**: Answers the question of "Who are you?". Once authenticated (logged in), user recieves a token.
+**Authentication**: Answers the question of "Who are you?". Once authenticated (logged in), user receives a token.
 
 **Authorisation**: Answers the question of "What are you allowed to do?". Once a user is logged in, they can only do certain actions. For example, an admin can delete any posts whereas a user can only delete theirs.
 
-**JWT (Json Web Tokens)**: A token given to the frontend client when the user logs in. THht toekn is needed for protected routes, such as updating user settings.
+**JWT (Json Web Tokens)**: A token given to the frontend client when the user logs in. That token is needed for protected routes, such as updating user settings.
 
 **Password Hashing**: Scramble the password with a unique salt for every different password (even if the password itself is the same)
 
@@ -55,7 +55,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 **201**: (Success) A new resource was created
 
-**204**: (Success) No content recieved
+**204**: (Success) No content received
 
 **400**: (Error) The client sent data that the server invalidated
 
@@ -72,14 +72,14 @@ This is some personal notes based off the project. Mix of what things mean, what
 1. Type Errors
 In schemas.py, the created_at for all schemas was set to a string, rather than a datetime object itself. Caused the request to fail (500 internal server error) because I was doing .datetime.today() on a field that required a string.
 
-2. UserUpdate Schema Inheritence
-The UserUpdate schema was inheriting from UserBase, which UserUpdate overrode(?) those field anyways. Caused weird issues in the Swagger docs like missing fields. So it was changed to just inherit from BaseMOdel.
+2. UserUpdate Schema Inheritance
+The UserUpdate schema was inheriting from UserBase, which UserUpdate overrode those fields anyways. Caused weird issues in the Swagger docs like missing fields. So it was changed to just inherit from BaseModel.
 
 3. Incorrect Dependency Injections
 Dependency Injections only work with HTTP requests and websockets, you can't do it on good old helper functions. So just inject it in the websocket endpoint.
 
 4. Failing to connect to the websocket
-The original apporach was for the connection manager to be a list of websockets. This would've been fine if it was a global chat or multiplayer game, but because we only want to log in the user on 1 client, it was changed to a dictionary of websockets, each with it's own unique session ID.
+The original apporach was for the connection manager to be a list of websockets. This would've been fine if it was a global chat or multiplayer game, but because we only want to log in the user on 1 client, it was changed to a dictionary of websockets, each with its own unique session ID.
 
 5. Cleanup when the websocket closes unexpectedly
 If the user closes their game, it does not remove the database row, meaning it is left behind forever. The fix was to just clean it up in the finally block of the websocket.
@@ -100,7 +100,7 @@ The websocket did not close because originally, I was only deleting it from Pyth
 - For security, don't reveal what went wrong when failing to login. Don't which is incorrect (password or email). Or just lie and say the password is incorrect when its the email.
 - Best practise to organise routes, with paramiticised ones at the end.
 - You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
-- You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distingush the difference. This is also standard practicse.
+- You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distinguish the difference. This is also standard practicse.
 - When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
 - session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
 - ~~Removed local_id from saves because it wasn't being used. It will be used for sessions instead.~~ Going back to this original idea. Godot will simply store the local_id (now save_id) locally and use that to get the save data when starting up. The downside is there can only be 1 logged in device at a time, later on this'll change to the new sessions idea.
@@ -112,7 +112,7 @@ The websocket did not close because originally, I was only deleting it from Pyth
 Run this command in the terminal for a super super secret key.
 
 - JSON Web Tokens (JWT) Structure
-It has 3 parts. (1) Header: contains the algorithm and type. (2) Payload: contains the data and expiration. (3) Signiture: proves the token wasn't tampered with. Signiture is created with our secret key meaning only our server can create valid tokens.
+It has 3 parts. (1) Header: contains the algorithm and type. (2) Payload: contains the data and expiration. (3) Signature: proves the token wasn't tampered with. Signature is created with our secret key meaning only our server can create valid tokens.
 
 - cascade = "all, delete-orphan"
-Doing this in a relationship tells SQLAlchemy to also delete the associated save data. If then that save data becomes an orphan and isn't connected to a suer, then delete it. Also automagically saves it to the database when a new save is made.
+Doing this in a relationship tells SQLAlchemy to also delete the associated save data. If then that save data becomes an orphan and isn't connected to a user, then delete it. Also automagically saves it to the database when a new save is made.
