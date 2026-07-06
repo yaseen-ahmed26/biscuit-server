@@ -62,3 +62,18 @@ async def check_email_exists(email: str, database: AsyncSession):
             status_code = status.HTTP_400_BAD_REQUEST,
             detail = f"email '{email}' already exists"
         )
+    
+async def get_save_file(save_id: str, database: AsyncSession):
+    result = await database.execute(
+        select(models.Save)
+        .where(models.Save.save_id == save_id)
+    )
+    existing_save = result.scalars().first()
+
+    if not existing_save:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = f"'no save with ID {save_id}' found"
+        )
+    
+    return existing_save
