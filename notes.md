@@ -90,6 +90,9 @@ Somehow this broke, not sure why. It wasn't checking if the old username is the 
 7. Websockets not closing when code is input
 The websocket did not close because originally, I was only deleting it from Python's memory. Must call .close() on the websocket to close it. This is also async so must be done with async def/await.
 
+8. "Unexpected ASGI message 'websocket.close', after sending 'websocket.close' or response already completed."
+This wsa caused because I was called await websocket.close() twice. Once in the manager.disconnect() and another in the finally block of the try/except. When I manually called manager.disconnect() it also ran the finally block which tried to clsoe the connected again.
+
 ---
 ### NOTES
 - There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.

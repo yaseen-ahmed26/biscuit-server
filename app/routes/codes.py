@@ -99,9 +99,6 @@ async def start_websocket(
     except Exception as error:
         print(f"An error occurred: {error}")
     finally:
-        if conncted and login_code is not None:
-            await manager.disconnect(login_code)     
-
         if login_code is not None:
             result = await database.execute(
                 select(models.Codes)
