@@ -144,7 +144,12 @@ async def verify(
         "save_id": user.save.save_id,
         "username": user.username,
         "save": {
-            "level": user.save.level
+            "biscuits": user.save.biscuits,
+            "total_biscuits": user.save.total_biscuits,
+            "total_playtime": user.save.total_playtime,
+            "total_clicks": user.save.total_clicks,
+            "bought_upgrades": user.save.bought_upgrades,
+            "completed_achievements": user.save.completed_achievements
         }
     })
     await asyncio.sleep(0.05)
