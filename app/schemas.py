@@ -59,8 +59,14 @@ class WebsocketMetadata(BaseModel):
 class SaveBase(BaseModel):
     model_config = ConfigDict(from_attributes = True)
 
-    level: int
     save_id: str
+
+    biscuits: float
+    total_biscuits: float
+    total_playtime: float
+    total_clicks: int
+    bought_upgrades: dict[str, int]
+    completed_achievements: list[str]
 
 class SaveResponse(SaveBase):
     pass

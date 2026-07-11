@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Float, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -31,6 +31,12 @@ class Save(Base):
     __tablename__ = "saves"
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key = True)
-    level: Mapped[int] = mapped_column(Integer, nullable = False)
     user: Mapped[User] = relationship(back_populates = "save")
     save_id: Mapped[str] = mapped_column(String(32), nullable = False)
+
+    biscuits: Mapped[float] = mapped_column(Float)
+    total_biscuits: Mapped[float] = mapped_column(Float)
+    total_playtime: Mapped[float] = mapped_column(Float)
+    total_clicks: Mapped[int] = mapped_column(Integer)
+    bought_upgrades: Mapped[dict[str, int]] = mapped_column(JSON)
+    completed_achievements: Mapped[list[str]] = mapped_column(JSON)
