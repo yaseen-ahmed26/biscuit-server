@@ -56,11 +56,7 @@ class WebsocketMetadata(BaseModel):
     country: str | None = Field(default = "Unknown", max_length = 32)
 
 # Saves
-class SaveBase(BaseModel):
-    model_config = ConfigDict(from_attributes = True)
-
-    save_id: str
-
+class GameSave(BaseModel):
     biscuits: float
     total_biscuits: float
     total_playtime: float
@@ -68,7 +64,12 @@ class SaveBase(BaseModel):
     bought_upgrades: dict[str, int]
     completed_achievements: list[str]
 
-class SaveUpdate(SaveBase):
+class SaveBase(GameSave):
+    model_config = ConfigDict(from_attributes = True)
+
+    save_id: str
+
+class SaveUpdate(GameSave):
     pass
 
 class SaveResponse(SaveBase):
