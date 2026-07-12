@@ -68,6 +68,9 @@ class SaveBase(BaseModel):
     bought_upgrades: dict[str, int]
     completed_achievements: list[str]
 
+class SaveUpdate(SaveBase):
+    pass
+
 class SaveResponse(SaveBase):
     pass
 

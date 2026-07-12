@@ -108,6 +108,7 @@ This wsa caused because I was called await websocket.close() twice. Once in the 
 - session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
 - ~~Removed local_id from saves because it wasn't being used. It will be used for sessions instead.~~ Going back to this original idea. Godot will simply store the local_id (now save_id) locally and use that to get the save data when starting up. The downside is there can only be 1 logged in device at a time, later on this'll change to the new sessions idea.
 - Temporarily doing save_id, it's not secure but I will leave it like this for now.
+- Should seperate UserBase into GameSave which only contains the game data and SaveBase which has the user_id
 
 ---
 ### MISC
