@@ -93,7 +93,7 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
 
     new_save = models.Save(
         save_id = generate_id(32),
-        biscuits = 0.0,
+        biscuits = 20.0,
         total_biscuits = 0.0,
         total_playtime = 0.0,
         total_clicks = 0,

@@ -21,6 +21,6 @@ router = APIRouter()
     response_model = SaveResponse
 )
 async def get_save_data(save_id: str, database: Annotated[AsyncSession, Depends(get_database)]):
-    existing_save = get_save_file(save_id, database)
+    existing_save = await get_save_file(save_id, database)
     
     return existing_save
