@@ -93,6 +93,9 @@ The websocket did not close because originally, I was only deleting it from Pyth
 8. "Unexpected ASGI message 'websocket.close', after sending 'websocket.close' or response already completed."
 This wsa caused because I was called await websocket.close() twice. Once in the manager.disconnect() and another in the finally block of the try/except. When I manually called manager.disconnect() it also ran the finally block which tried to clsoe the connected again.
 
+9. Lazy Loading
+FastAPI required some data, but the user object didn't have it. But SQLAlchemy wasn't allowed to load it alongside and so needed a database query.
+
 ---
 ### NOTES
 - There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.

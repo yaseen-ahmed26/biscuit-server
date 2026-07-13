@@ -71,7 +71,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], data
 
 @router.get(
     "/me", 
-    response_model = UserPrivate
+    response_model = UserSave
 )
 def get_current_user(current_user: CurrentUser):
     return current_user

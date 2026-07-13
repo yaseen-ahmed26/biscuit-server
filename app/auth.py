@@ -9,6 +9,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -81,6 +82,7 @@ async def get_current_user(
 
     result = await database.execute(
         select(models.User)
+        .options(selectinload(models.User.save))
         .where(models.User.id == user_id_int)
     )
 
