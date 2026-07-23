@@ -4,7 +4,7 @@ This is the Server of the 'Biscuit' Project.
 ![Diagram of the project](images/diagram.jpg)
 Diagram of the project created just before the project began development.
 
-Development notes: [NOTES.md](NOTES.md). Includes sections on challenges solved, decsions made etc.
+Development notes: [NOTES.md](docs/NOTES.md). Includes sections on challenges solved, decsions made etc.
 
 ---
 
