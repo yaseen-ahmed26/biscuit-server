@@ -75,4 +75,8 @@ class SaveUpdate(GameSave):
 class SaveResponse(SaveBase):
     pass
 
+# Sessions
+class RefreshReqeust(BaseModel):
+    user_id: int
+
 UserSave.model_rebuild()

@@ -46,10 +46,13 @@ This is some personal notes based off the project. Mix of what things mean, what
 ### 1. Fixed Issues and Challenges
 1. **Remember to add new routers to main.py**: I spent 30 minutes trying to figure out why the /refresh endpoint wasn't working. Only to realise I didn't add it to the main.py.
 
+2. **Paramaters need type hints of defaults**: Got a 422 in /refresh endpoint because there was a param user_info with no default type hint. So Pydantic was confused and FastAPI defaulted it to a query paramter which wasn't in the URL.
+
 ---
 ### 2. Notes
 - By default, refresh tokens are attached to all API requests which isn't necessary or safe. Restrict the path to only the route it should be attached to, in this case, refresh.
 - Also by default, the token will disappear once the user closes the browser which defeats the purpose of refresh tokens. 7 * 24 * 3600 is exactly 7 days.
+- No data is needed for /refresh endpoint so can remove the schema. Also, need to check if the refresh token is empty (None)
 
 ## LEARNING
 ### 1. Tools

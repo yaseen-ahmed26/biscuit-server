@@ -2,14 +2,14 @@
 from fastapi import status, HTTPException, Depends, APIRouter, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import Token
+from schemas import Token, RefreshReqeust
 
 from database import get_database
 import models
@@ -18,6 +18,7 @@ from security import (
     create_access_token, 
     verify_password,
     create_refresh_token,
+    hash_refresh_token,
 )
 
 from config import settings
@@ -82,9 +83,73 @@ async def login(
 
 @router.post(
     "/refresh",
+    response_model = Token
 )
-async def get_new_token(refresh_token: Annotated[str | None, Cookie()], database: Annotated[AsyncSession, Depends(get_database)]):
-    pass
+async def get_new_token(
+    user_info: RefreshReqeust,
+    refresh_token: Annotated[str | None, Cookie()], 
+    database: Annotated[AsyncSession, Depends(get_database)],
+    response: Response
+):
+    hashed_token = hash_refresh_token(refresh_token)
+    
+    result = await database.execute(
+        select(models.Session)
+        .where(models.Session.token_hash == hashed_token)
+    )
+
+    stored_token = result.scalars().first()
+
+    if not stored_token:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "refresh token does not exist"
+        )
+
+    if stored_token.expired:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "refresh token already used"
+        )
+
+    if stored_token.expires_at < datetime.now():
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "refresh token is expired"
+        )
+
+    access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
+    
+    access_token = create_access_token(
+        data = {"sub": str(stored_token.user_id)},
+        expires_delta = access_token_expires,
+    )
+
+    plain_token, hashed_token = create_refresh_token()
+    expires_at = datetime.now() + timedelta(days = 7)
+
+    response.set_cookie(        
+        key = "refresh_token",        
+        value = plain_token,       
+        secure = True,        
+        httponly = True,
+        path = "/api/auth/refresh",
+        max_age = 7 * 24 * 3600
+    )
+
+    new_session = models.Session(
+        user_id = stored_token.user_id,
+        token_hash = hashed_token,
+        expires_at = expires_at,  
+        expired = False
+    )
+
+    stored_token.expired = True
+
+    database.add(new_session)
+    await database.commit()
+
+    return Token(access_token = access_token, token_type = "bearer")
 
 @router.post(
     "/logout",
