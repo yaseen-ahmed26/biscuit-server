@@ -47,6 +47,8 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 ---
 ### 2. Notes
+- By default, refresh tokens are attached to all API requests which isn't necessary or safe. Restrict the path to only the route it should be attached to, in this case, refresh.
+- Also by default, the token will disappear once the user closes the browser which defeats the purpose of refresh tokens. 7 * 24 * 3600 is exactly 7 days.
 
 ## LEARNING
 ### 1. Tools

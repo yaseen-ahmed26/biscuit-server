@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from datetime import datetime, timedelta
@@ -31,7 +31,8 @@ import models
 from auth import (
     create_access_token, 
     hash_password, 
-    verify_password, 
+    verify_password,
+    create_refresh_token,
     CurrentUser
 )
 
@@ -45,7 +46,11 @@ router = APIRouter()
     "/token", 
     response_model = Token
 )
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], database: Annotated[AsyncSession, Depends(get_database)]):
+async def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
+    database: Annotated[AsyncSession, Depends(get_database)],
+    response: Response
+):
     result = await database.execute(
         select(models.User)
         .where(models.User.email == form_data.username)
@@ -65,6 +70,17 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], data
     access_token = create_access_token(
         data = {"sub": str(user.id)},
         expires_delta = access_token_expires,
+    )
+
+    plain_token, hashed_token = create_refresh_token()
+
+    response.set_cookie(        
+		key = "refresh_token",        
+		value = plain_token,       
+		secure = True,        
+		httponly = True,
+        path = "/api/auth/refresh",
+        max_age = 7 * 24 * 3600
     )
 
     return Token(access_token = access_token, token_type = "bearer")
