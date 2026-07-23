@@ -6,7 +6,7 @@ from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 from contextlib import asynccontextmanager
 
 from database import Base, engine
-from routes import users, codes, saves
+from routes import users, codes, saves, auth
 
 # ------- SETUP -------
 @asynccontextmanager
@@ -31,6 +31,12 @@ app.include_router(
     codes.router, 
     prefix = "/api/codes",
     tags = ["codes"]
+)
+
+app.include_router(
+    auth.router, 
+    prefix = "/api/auth",
+    tags = ["auth"]
 )
 
 app.include_router(

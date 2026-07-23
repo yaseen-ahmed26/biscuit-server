@@ -12,7 +12,7 @@ from schemas import CodeResponse, Code, WebsocketMetadata
 from database import get_database
 import models
 
-from auth import CurrentUser
+from security import CurrentUser
 from helpers import generate_id
 
 import asyncio

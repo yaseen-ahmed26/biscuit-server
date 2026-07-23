@@ -28,7 +28,7 @@ from helpers import (
 from database import get_database
 import models
 
-from auth import (
+from security import (
     create_access_token, 
     hash_password, 
     verify_password,
@@ -79,7 +79,7 @@ async def login(
 		value = plain_token,       
 		secure = True,        
 		httponly = True,
-        path = "/api/auth/refresh",
+        path = "/api/auth",
         max_age = 7 * 24 * 3600
     )
 
