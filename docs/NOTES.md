@@ -44,6 +44,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 ## Version 2
 ### 1. Fixed Issues and Challenges
+1. **Remember to add new routers to main.py**: I spent 30 minutes trying to figure out why the /refresh endpoint wasn't working. Only to realise I didn't add it to the main.py.
 
 ---
 ### 2. Notes
