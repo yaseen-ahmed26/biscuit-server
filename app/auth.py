@@ -1,6 +1,7 @@
 # ------- IMPORTS -------
 from datetime import UTC, datetime, timedelta
-
+import hashlib
+from hmac import compare_digest
 import jwt
 from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
@@ -15,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 import models
 from database import get_database
+from helpers import generate_id
 
 # ------- SETUP -------
 password_hash = PasswordHash.recommended()
@@ -57,6 +59,19 @@ def verify_access_token(token: str) -> str | None:
         return None
     else:
         return payload.get("sub")
+
+def hash_refresh_token(plain_token: str):
+    return hashlib.sha256(plain_token.encode()).hexdigest()
+
+def create_refresh_token():    
+    plain_token = generate_id(64)    
+    hashed_token = hash_refresh_token(plain_token)
+    
+    return plain_token, hashed_token
+
+def verify_refresh_token(plain_token: str, stored_token: str):
+    incoming_hash = hash_refresh_token(plain_token)
+    return compare_digest(incoming_hash, stored_token)
     
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
