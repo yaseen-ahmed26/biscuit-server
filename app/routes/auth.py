@@ -57,6 +57,7 @@ async def login(
     )
 
     plain_token, hashed_token = create_refresh_token()
+    expires_at = datetime.now() + timedelta(days = 7)
 
     response.set_cookie(        
 		key = "refresh_token",        
@@ -66,6 +67,16 @@ async def login(
         path = "/api/auth/refresh",
         max_age = 7 * 24 * 3600
     )
+
+    new_session = models.Session(
+        user_id = user.id,
+        token_hash = hashed_token,
+        expires_at = expires_at,  
+        expired = False
+    )
+
+    database.add(new_session)
+    await database.commit()
 
     return Token(access_token = access_token, token_type = "bearer")
 
