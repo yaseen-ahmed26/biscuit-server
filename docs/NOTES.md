@@ -53,6 +53,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 - By default, refresh tokens are attached to all API requests which isn't necessary or safe. Restrict the path to only the route it should be attached to, in this case, refresh.
 - Also by default, the token will disappear once the user closes the browser which defeats the purpose of refresh tokens. 7 * 24 * 3600 is exactly 7 days.
 - No data is needed for /refresh endpoint so can remove the schema. Also, need to check if the refresh token is empty (None)
+- Refactor auth/login and auth/refresh to be less duplicated. Can have 2 helpers, one for each token type.
 
 ## LEARNING
 ### 1. Tools

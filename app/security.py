@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import hashlib
 from hmac import compare_digest
 import jwt
+from fastapi import Cookie
 from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 
@@ -74,10 +75,10 @@ def verify_refresh_token(plain_token: str, stored_token: str):
     return compare_digest(incoming_hash, stored_token)
     
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    database: Annotated[AsyncSession, Depends(get_database)]
+    database: Annotated[AsyncSession, Depends(get_database)],
+    access_token: Annotated[str | None, Cookie()] = None
 ) -> models.User:
-    user_id = verify_access_token(token)
+    user_id = verify_access_token(access_token)
 
     if user_id is None:
         raise HTTPException(

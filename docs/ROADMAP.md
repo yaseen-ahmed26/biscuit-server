@@ -4,9 +4,9 @@ Rough roadmap of features I would like to implement and how I will. Note that Po
 ---
 
 #### Quick Overview
-**[ ]** = To-do | **[x]** = Complete | **[?]** Under Consideration | **[/]** = In Progress
+**[ ]** = To-do | **[✓]** = Complete | **[?]** Under Consideration | **[/]** = In Progress
 
-- [/] Refresh Tokens
+- [✓] Refresh Tokens
 - [?] Refresh Tokens for Godot
 - [?] Resend Emails
 - [ ] Websocket Expiration

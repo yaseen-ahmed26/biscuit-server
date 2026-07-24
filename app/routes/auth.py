@@ -9,8 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import Token
-
 from database import get_database
 import models
 
@@ -29,7 +27,7 @@ router = APIRouter()
 # ------- ENDPOINTS -------
 @router.post(
     "/login", 
-    response_model = Token
+    status_code = status.HTTP_200_OK
 )
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
@@ -69,6 +67,15 @@ async def login(
         max_age = 7 * 24 * 3600
     )
 
+    response.set_cookie(        
+        key = "access_token",        
+        value = access_token,       
+        secure = True,        
+        httponly = True,
+        path = "/",
+        max_age = 7200
+    )
+
     new_session = models.Session(
         user_id = user.id,
         token_hash = hashed_token,
@@ -79,11 +86,9 @@ async def login(
     database.add(new_session)
     await database.commit()
 
-    return Token(access_token = access_token, token_type = "bearer")
-
 @router.post(
     "/refresh",
-    response_model = Token
+    status_code = status.HTTP_200_OK
 )
 async def get_new_token(
     database: Annotated[AsyncSession, Depends(get_database)],
@@ -154,6 +159,15 @@ async def get_new_token(
         max_age = 7 * 24 * 3600
     )
 
+    response.set_cookie(        
+        key = "access_token",        
+        value = access_token,       
+        secure = True,        
+        httponly = True,
+        path = "/",
+        max_age = 3600
+    )
+
     new_session = models.Session(
         user_id = stored_token.user_id,
         token_hash = hashed_token,
@@ -165,8 +179,6 @@ async def get_new_token(
 
     database.add(new_session)
     await database.commit()
-
-    return Token(access_token = access_token, token_type = "bearer")
 
 @router.post(
     "/logout",
