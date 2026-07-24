@@ -86,10 +86,16 @@ async def login(
     response_model = Token
 )
 async def get_new_token(
-    refresh_token: Annotated[str | None, Cookie()], 
     database: Annotated[AsyncSession, Depends(get_database)],
-    response: Response
+    response: Response,
+    refresh_token: Annotated[str | None, Cookie()] = None
 ):
+    if refresh_token is None:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "no refresh token provided"
+        )
+    
     hashed_token = hash_refresh_token(refresh_token)
     
     result = await database.execute(
