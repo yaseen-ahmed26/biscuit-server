@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import Token, RefreshReqeust
+from schemas import Token
 
 from database import get_database
 import models
@@ -86,7 +86,6 @@ async def login(
     response_model = Token
 )
 async def get_new_token(
-    user_info: RefreshReqeust,
     refresh_token: Annotated[str | None, Cookie()], 
     database: Annotated[AsyncSession, Depends(get_database)],
     response: Response
