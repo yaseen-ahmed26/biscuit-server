@@ -106,6 +106,18 @@ async def get_new_token(
         )
 
     if stored_token.expired:
+        result = await database.execute(
+            select(models.Session)
+            .where(models.Session.user_id == stored_token.user_id)
+        )
+        
+        stored_user_tokens = result.scalars().all()
+
+        for t in stored_user_tokens:
+            await database.delete(t)
+        
+        await database.commit()
+
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "refresh token already used"
@@ -126,7 +138,7 @@ async def get_new_token(
 
     plain_token, hashed_token = create_refresh_token()
     expires_at = datetime.now() + timedelta(days = 7)
-
+    
     response.set_cookie(        
         key = "refresh_token",        
         value = plain_token,       
