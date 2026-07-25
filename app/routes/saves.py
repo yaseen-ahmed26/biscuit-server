@@ -1,21 +1,46 @@
 # ------- IMPORTS -------
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import Depends, APIRouter
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import SaveResponse, SaveUpdate
+from schemas import SaveResponse, SaveUpdate, LeaderboardUser
 from database import get_database
 import models
 
-from helpers import get_save_file
+from helpers import get_save_file, get_user_by_id
 
 # ------- SETUP -------
 router = APIRouter()
 
 # ------- ENDPOINTS -------
+@router.get(
+    "/leaderboard",
+    response_model = list[LeaderboardUser]
+)
+async def get_leaderboard(
+    database: Annotated[AsyncSession, Depends(get_database)],
+    stat: str = "total_biscuits", 
+    amount: int = 5
+):
+    stat_column = getattr(models.Save, stat)
+    
+    result = await database.execute(
+        select(models.Save)
+        .order_by(stat_column.desc())
+        .limit(amount)
+    )
+
+    top_saves = result.scalars().all()
+
+    for save in top_saves:
+        user = await get_user_by_id(save.user_id, database)
+        save.username = user.username
+
+    return top_saves
+
 @router.get(
     "/{save_id}",
     response_model = SaveResponse

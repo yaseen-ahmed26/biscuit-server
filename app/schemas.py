@@ -75,4 +75,8 @@ class SaveUpdate(GameSave):
 class SaveResponse(SaveBase):
     pass
 
+class LeaderboardUser(BaseModel):
+    total_biscuits: float
+    username: str
+
 UserSave.model_rebuild()
