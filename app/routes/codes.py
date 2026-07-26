@@ -78,13 +78,11 @@ async def start_websocket(
     metadata: WebsocketMetadata = Depends()
 ):
     login_code = None
-    conncted = False
 
     try:
         login_code, expires_at = await generate_websocket_info(database, metadata)
 
         await manager.connect(login_code, websocket)
-        conncted = True
 
         await manager.send_json_message(login_code, {
             "type": "information",
@@ -92,8 +90,23 @@ async def start_websocket(
         })
 
         while True:
-            message = await websocket.receive_text()
+            remaining_time = (expires_at - datetime.now(UTC)).total_seconds()
+            
+            if remaining_time <= 0:
+                raise asyncio.TimeoutError()
 
+            message = await asyncio.wait_for(
+                websocket.receive_text(), 
+                timeout = remaining_time
+            )
+
+    except asyncio.TimeoutError:
+        print("Websocket timed out")
+
+        await manager.send_json_message(login_code, {
+            "type": "expired",
+            "detail": "websocket has expired"
+        })
     except WebSocketDisconnect:
         print("Client disconnected")
     except Exception as error:

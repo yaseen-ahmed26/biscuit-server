@@ -9,10 +9,10 @@ Rough roadmap of features I would like to implement and how I will. Note that Po
 - [✓] Refresh Tokens
 - [?] Refresh Tokens for Godot
 - [?] Resend Emails
-- [ ] Websocket Expiration
+- [✓] Websocket Expiration
 - Additional Endpoints
     - [ ] GET save_by_username
-    - [ ] GET leaderboard_users
+    - [✓] GET leaderboard_users
 
 ---
 

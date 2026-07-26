@@ -54,6 +54,7 @@ This is some personal notes based off the project. Mix of what things mean, what
 - Also by default, the token will disappear once the user closes the browser which defeats the purpose of refresh tokens. 7 * 24 * 3600 is exactly 7 days.
 - No data is needed for /refresh endpoint so can remove the schema. Also, need to check if the refresh token is empty (None)
 - Refactor auth/login and auth/refresh to be less duplicated. Can have 2 helpers, one for each token type.
+- You can have custom websocket expiry codes. There are specific ranges, 1000-3000 is the standard codes like 1000 for noraml closure. 3000-4000 is for specific libraries or frameworks. Then 4000-5000 is custom codes. Good to have so the client can much easier know what happened rather than trying to parse JSON.
 
 ## LEARNING
 ### 1. Tools
