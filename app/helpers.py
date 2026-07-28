@@ -7,13 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
-
-# ------- SETUP -------
-alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+from constants import ALPHANUMERIC_SET
 
 # ------- FUNCTIONS -------
 def generate_id(size: int = 5):
-    return generate(alphanumeric, size)
+    return generate(ALPHANUMERIC_SET, size)
 
 async def compare_user_id(target_id: int, current_user_id: int):
     if target_id != current_user_id:

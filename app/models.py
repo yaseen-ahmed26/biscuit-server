@@ -7,15 +7,21 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Float, JSON, Boole
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
+from constants import (
+    USERNAME_MAX_LENGTH,
+    EMAIL_MAX_LENGTH,
+    PASSWORD_HASH_MAX_LENGTH,
+    SAVE_ID_LENGTH
+)
 
 # ------ TABLES ------
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key = True, index = True)
-    username: Mapped[str] = mapped_column(String(30), unique = True, nullable = False)
-    email: Mapped[str] = mapped_column(String(60), unique = True, nullable = False)
-    password_hash: Mapped[str] = mapped_column(String(200), nullable = False)
+    username: Mapped[str] = mapped_column(String(USERNAME_MAX_LENGTH), unique = True, nullable = False)
+    email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique = True, nullable = False)
+    password_hash: Mapped[str] = mapped_column(String(PASSWORD_HASH_MAX_LENGTH), nullable = False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), default = lambda: datetime.now(UTC))
     save: Mapped["Save"] = relationship(back_populates = "user", cascade = "all, delete-orphan")
 
@@ -32,7 +38,7 @@ class Save(Base):
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key = True)
     user: Mapped[User] = relationship(back_populates = "save")
-    save_id: Mapped[str] = mapped_column(String(32), nullable = False)
+    save_id: Mapped[str] = mapped_column(String(SAVE_ID_LENGTH), nullable = False)
 
     biscuits: Mapped[float] = mapped_column(Float)
     total_biscuits: Mapped[float] = mapped_column(Float)

@@ -17,6 +17,8 @@ from helpers import generate_id
 
 import asyncio
 
+from constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
+
 # ------- SETUP -------
 router = APIRouter()
 
@@ -53,8 +55,8 @@ manager = ConnectionManager()
 
 # ------- HELPERS -------
 async def generate_websocket_info(database: AsyncSession, metadata):
-    login_code = generate_id(7)
-    expires_at = datetime.now(UTC) + timedelta(minutes = 2)
+    login_code = generate_id(LOGIN_CODE_LENGTH)
+    expires_at = datetime.now(UTC) + timedelta(minutes = LOGIN_CODE_EXPIRATION_MINS)
 
     new_code = models.Codes(
         login_code = login_code,

@@ -8,6 +8,7 @@ from pydantic import (
 )
 
 from datetime import datetime
+from constants import LOGIN_CODE_LENGTH
 
 # ------- SCHEMAS -------
 # Users
@@ -44,7 +45,7 @@ class Token(BaseModel):
 
 # Codes
 class Code(BaseModel):
-    login_code: str = Field(min_length = 7, max_length = 7)
+    login_code: str = Field(min_length = LOGIN_CODE_LENGTH, max_length = LOGIN_CODE_LENGTH)
 
 class CodeResponse(BaseModel):
     login_code: str

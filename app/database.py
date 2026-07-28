@@ -2,9 +2,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-# ------- SETUP -------
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./biscuit.db"
+from constants import SQLALCHEMY_DATABASE_URL
 
+# ------- SETUP -------
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
 
 AsyncSessionLocal = async_sessionmaker(

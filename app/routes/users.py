@@ -28,6 +28,7 @@ from security import (
     verify_password,
     CurrentUser
 )
+from constants import DEFAULT_PLAYER_STATS, SAVE_ID_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()
@@ -56,16 +57,8 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
     )
 
     new_save = models.Save(
-        save_id = generate_id(32),
-        biscuits = 20.0,
-        total_biscuits = 0.0,
-        total_playtime = 0.0,
-        total_clicks = 0,
-        owned_upgrades = {},
-        owned_achievements = [],
-        prestige = 0,
-        crumbs = 0,
-        owned_unlocks = []
+        save_id = generate_id(SAVE_ID_LENGTH),
+        **DEFAULT_PLAYER_STATS
     )
 
     new_user.save = new_save

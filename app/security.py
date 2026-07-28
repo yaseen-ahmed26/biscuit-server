@@ -18,6 +18,7 @@ from config import settings
 import models
 from database import get_database
 from helpers import generate_id
+from constants import REFRESH_TOKEN_LENGTH
 
 # ------- SETUP -------
 password_hash = PasswordHash.recommended()
@@ -65,7 +66,7 @@ def hash_refresh_token(plain_token: str):
     return hashlib.sha256(plain_token.encode()).hexdigest()
 
 def create_refresh_token():    
-    plain_token = generate_id(64)    
+    plain_token = generate_id(REFRESH_TOKEN_LENGTH)    
     hashed_token = hash_refresh_token(plain_token)
     
     return plain_token, hashed_token
