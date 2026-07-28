@@ -7,11 +7,35 @@ from contextlib import asynccontextmanager
 
 from database import Base, engine
 from routes import users, codes, saves, auth
+from constants import ORIGINS
+
+# ------- CONSTANTS -------
+ROUTERS = [
+    {
+        "router": users.router,
+        "prefix": "/api/users",
+        "tags": ["users"],
+    },
+    {
+        "router": codes.router,
+        "prefix": "/api/codes",
+        "tags": ["codes"],
+    },
+    {
+        "router": auth.router,
+        "prefix": "/api/auth",
+        "tags": ["auth"],
+    },
+    {
+        "router": saves.router,
+        "prefix": "/api/saves",
+        "tags": ["saves"],
+    },
+]
 
 # ------- SETUP -------
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    # On Startup.
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
 
@@ -21,37 +45,12 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan = lifespan, docs_url = None)
 
-app.include_router(
-    users.router, 
-    prefix = "/api/users",
-    tags = ["users"]
-)
-
-app.include_router(
-    codes.router, 
-    prefix = "/api/codes",
-    tags = ["codes"]
-)
-
-app.include_router(
-    auth.router, 
-    prefix = "/api/auth",
-    tags = ["auth"]
-)
-
-app.include_router(
-    saves.router, 
-    prefix = "/api/saves",
-    tags = ["saves"]
-)
-
-origns = [
-    "http://127.0.0.1:5500"
-]
+for router in ROUTERS:
+    app.include_router(**router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = origns,
+    allow_origins = ORIGINS,
     allow_credentials = True,
     allow_methods = ["*"],
     allow_headers = ["*"]

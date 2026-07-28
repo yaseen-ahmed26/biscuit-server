@@ -48,6 +48,8 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 2. **Paramaters need type hints of defaults**: Got a 422 in /refresh endpoint because there was a param user_info with no default type hint. So Pydantic was confused and FastAPI defaulted it to a query paramter which wasn't in the URL.
 
+3. **Circular imports**: Tried to move the new routers list in main.py to constants.py. Then it created a loop where it loaded codes.py, but during when constants.py wasn't fully initialized. So the imports codes.py got from constants.py haven't been loaded yet. So just keep that routers list in main.py.
+
 ---
 ### 2. Notes
 - By default, refresh tokens are attached to all API requests which isn't necessary or safe. Restrict the path to only the route it should be attached to, in this case, refresh.
