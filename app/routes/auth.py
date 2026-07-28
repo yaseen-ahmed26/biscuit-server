@@ -63,7 +63,7 @@ async def login(
 		value = plain_token,       
 		secure = True,        
 		httponly = True,
-        path = "/api/auth/refresh",
+        path = "/",
         max_age = 7 * 24 * 3600
     )
 
@@ -155,7 +155,7 @@ async def get_new_token(
         value = plain_token,       
         secure = True,        
         httponly = True,
-        path = "/api/auth/refresh",
+        path = "/",
         max_age = 7 * 24 * 3600
     )
 
@@ -183,5 +183,34 @@ async def get_new_token(
 @router.post(
     "/logout",
 )
-async def revoke_refresh_token(database: Annotated[AsyncSession, Depends(get_database)]):
-    pass
+async def logout(
+    response: Response,
+    database: Annotated[AsyncSession, Depends(get_database)],
+    refresh_token: Annotated[str | None, Cookie()] = None
+):
+    hashed_token = hash_refresh_token(refresh_token)
+        
+    result = await database.execute(
+        select(models.Session)
+        .where(models.Session.token_hash == hashed_token)
+    )
+
+    stored_token = result.scalars().first()
+
+    if stored_token:
+        await database.delete(stored_token)
+        await database.commit()
+
+    response.delete_cookie(
+        key = "access_token",
+        secure = True,        
+        httponly = True,
+        path = "/",
+    )
+
+    response.delete_cookie(
+        key = "refresh_token",
+        secure = True,        
+        httponly = True,
+        path = "/",
+    )

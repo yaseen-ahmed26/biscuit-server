@@ -10,9 +10,11 @@ Rough roadmap of features I would like to implement and how I will. Note that Po
 - [?] Refresh Tokens for Godot
 - [?] Resend Emails
 - [✓] Websocket Expiration
+- [ ] Refactor auth router to be less duplicated
 - Additional Endpoints
     - [ ] GET save_by_username
     - [✓] GET leaderboard_users
+    - [✓] POST logout
 
 ---
 
