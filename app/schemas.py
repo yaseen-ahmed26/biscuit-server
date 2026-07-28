@@ -61,8 +61,11 @@ class GameSave(BaseModel):
     total_biscuits: float
     total_playtime: float
     total_clicks: int
-    bought_upgrades: dict[str, int]
-    completed_achievements: list[str]
+    owned_upgrades: dict[str, int]
+    owned_achievements: list[str]
+    prestige: int
+    crumbs: int
+    owned_unlocks: list[str]
 
 class SaveBase(GameSave):
     model_config = ConfigDict(from_attributes = True)

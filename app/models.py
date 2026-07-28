@@ -38,8 +38,11 @@ class Save(Base):
     total_biscuits: Mapped[float] = mapped_column(Float)
     total_playtime: Mapped[float] = mapped_column(Float)
     total_clicks: Mapped[int] = mapped_column(Integer)
-    bought_upgrades: Mapped[dict[str, int]] = mapped_column(JSON)
-    completed_achievements: Mapped[list[str]] = mapped_column(JSON)
+    owned_upgrades: Mapped[dict[str, int]] = mapped_column(JSON)
+    owned_achievements: Mapped[list[str]] = mapped_column(JSON)
+    prestige: Mapped[int] = mapped_column(Integer)
+    crumbs: Mapped[int] = mapped_column(Integer)
+    owned_unlocks: Mapped[list[str]] = mapped_column(JSON)
 
 class Session(Base):    
     __tablename__ = "sessions"

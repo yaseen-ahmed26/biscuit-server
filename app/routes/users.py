@@ -61,8 +61,11 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
         total_biscuits = 0.0,
         total_playtime = 0.0,
         total_clicks = 0,
-        bought_upgrades = {},
-        completed_achievements = []
+        owned_upgrades = {},
+        owned_achievements = [],
+        prestige = 0,
+        crumbs = 0,
+        owned_unlocks = []
     )
 
     new_user.save = new_save
