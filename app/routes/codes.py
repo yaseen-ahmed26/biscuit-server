@@ -163,8 +163,11 @@ async def verify(
             "total_biscuits": user.save.total_biscuits,
             "total_playtime": user.save.total_playtime,
             "total_clicks": user.save.total_clicks,
-            "bought_upgrades": user.save.bought_upgrades,
-            "completed_achievements": user.save.completed_achievements
+            "owned_upgrades": user.save.owned_upgrades,
+            "owned_achievements": user.save.owned_achievements,
+            "prestige": user.save.prestige,
+            "crumbs": user.save.crumbs,
+            "owned_unlocks": user.save.owned_unlocks,
         }
     })
     await asyncio.sleep(0.05)
