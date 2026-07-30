@@ -1,5 +1,9 @@
 # v2 Roadmap
-Rough roadmap of features I would like to implement and how I will. Note that PostgreSQL will also happen but at the very end of v2.
+Rough roadmap of features I would like to implement and how I will. 
+
+Note that PostgreSQL will also happen but at the very end of v2.
+
+Also note that the future features on the README were not final.
 
 ---
 
@@ -10,7 +14,8 @@ Rough roadmap of features I would like to implement and how I will. Note that Po
 - [?] Refresh Tokens for Godot
 - [?] Resend Emails
 - [✓] Websocket Expiration
-- [ ] Refactor auth router to be less duplicated
+- [✓] Refactor auth router to be less duplicated
+- [ ] Boolean if account and game has been linked
 - Additional Endpoints
     - [ ] GET save_by_username
     - [✓] GET leaderboard_users
@@ -18,107 +23,49 @@ Rough roadmap of features I would like to implement and how I will. Note that Po
 
 ---
 
-#### Timeline
-
-1. implement refresh tokens
-this requires a new database table, new endpoints
-
-the website requires a lot of changes. api calls need to be handled in a way where if there is a 401 invalid access token, call the /refresh token, then try the original api request again
-
-/refresh token should be in its own route
-
-3. leaderboards
-
-this should be simple. add a leaderboards endpoint in saves route. returns 10 top most biscuits (keep simple, only have 1 leaderboard)
-
-4. shareable stats link
-
-would need to have another endpoint GET get_save_by_username or similar
-
-5. websocket expiration
-
-easy, just check the current time against the expires_at since we already look out for messages from godot
-
----
-
 #### Implementation
 
-- **refresh tokens**
+FEATURES
 
-create database tables: hashed_token, id, user_id, is_used, expires_at, os, country
+1. **Refresh tokens**
+- Create a database table.
+    - Can have the following: hashed_token, id, user_id, is_used, expires_at, os, country.
+    - Storing the OS and country may not be possible, depending on implementation.
+- Generate a 64 opaque string, hash it and store it in the database (with SHA-256). Send back the raw token as a HTTP cookie.
+- Have a auth/refresh endpoint.
+    - If token doesn’t exist: 401 (force login)
+    - If token is expired: 401 (force login)
+    - If token is valid, active and not marked: issue new token.
+    - If a token is marked: delete every entry in the database with the user's ID. This means the account is likely compromsied.
+- If a new refresh token is issed, mark the old one (is_used = true). If it is used again, we know the account is compromised.
+- *****JavaScript must have credentials: true in the request to recieve cookies.
+- Edit the /token endpoint to also include a refresh token as a cookie.
+- Would now need a /logout endpoint to revoke the refresh token.
+- Could move login endpoint to a refresh route, which has /login, /logout and /refresh.
 
-have a /refresh endpoint to check refresh tokens:
+2. **JWT tokens to godot**
+- Can likely just use refresh tokens and it should work the same way.
+- Would need to edit get_save endpoint to check for a valid refresh token
+    - Access token would contain the user's ID so no ened to store locally.
+- Much more reliable than the current save IDs being used.
 
-if token doesn’t exist: 401 (force login)
+3. **Resend emails (welcome, verify, reset password)**
+- Possible, would need a domain.
+- Keep simple for now, just a welcome email.
+- A verify email may also be simple. allow the user to login, but not be able to link game until verified.
+    - Requires a is_verified bool in the users table.
+- When the user creates the account, send an email containing a unique code attached to the URL. 
+    - When the URL is clicked, backend checks to see if valid, and if it is, flip is_verified.
+- Would need a verify_sessions table in the database, would also need to hash codes with SHA-256. 
+    - Some columns can be: user_id, hashed_token, expires_at
 
-if token is expired: 401 (force login)
-
-if token is valid, active and not marked: generate a 64 character string, hash it and store it in the database (with SHA-256). send back the raw token as a http cookie
-
-if token is marked: go nuclear and delete every refresh token with the user’s id on it
-
-when the frontend gets a 401 invalid or expired access token, call that /refresh endpoint
-
-server then marks the old one (is_used = true) and issues a new one then return the raw one
-
-*****js must have credentials: true in the request
-
-edit the /token endpoint to also include a refresh token as a cookie
-
-would now need a /logout endpoint to revoke the refresh token
-
-could move login endpoint to a refresh route, which has /login, /logout and /refresh
-
-- **jwt tokens to godot**
-
-can likely just use refresh tokens and it should work the same way
-
-would need to edit get_save endpoint to check for a valid refresh token
-
-this'll be much more secure than passing the save id as a query param, since the refresh token has the user id in the table, we can use that to get the save data though would be slower if there's hundreds of users
-
-- **resend emails (welcome, verify, reset password)**
-
-would need to buy a domain
-
-keep simple for now, just a welcome email
-
-verify email may also be simple. allow the user to login, but not be able to link game until verified
-
-add a is_verified bool to users table
-
-when the user creates the account, send an email containing a unique code attached to the url. when the url is clicked, backend checks to see if valid, and if it is, flip is_verified
-
-would need a verify_sessions table in the database, would also need to hash codes with SHA-256. 
-
-has columns for user_id, hashed_token, expires_at
-
-js would call an endpoint /verify, send the code and backend check if its valid and expired. if its expired, user can just click button again on the website
-
-- **convert to postgresql and alembic**
-
-2 options, either use postgre with docker and switch out the urls or continue to use sqlite locally and only use posrgre for deployment
-
-the latter works but we should mirror production during development as close as possible 
+4. **Convert to PostgreSQL**
+- 2 options, either use PostgreSQL with Docker and switch out the URLs or continue to use SQLite locally and only use PostgreSQL for deployment.
+    - The latter works but we should mirror production during development as close as possible.
 
 ---
 
 SMALL STUFF
 
-- **add websocket expiration time (2 mins)**
-
-simple, since we’re constantly checking to see if the client sent a message, we can also just check the time
-
-compare the expires_at column and the current time, then just close the websocket
-
----
-
-ADDITIONAL
-
-- **needs a get_save_by_user endpoint**
-
-used by the website for sharable links
-
-- **needs a get_leaderboard_users endpoint**
-
-takes some query params, filter data
+1. **Add websocket expiration time (2 mins)**
+- Compare the expires_at column and the current time, then just close the websocket.
