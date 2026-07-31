@@ -1,6 +1,5 @@
 from fastapi import status, HTTPException, Depends, APIRouter
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
@@ -134,23 +133,4 @@ async def update_user(
     await database.commit()
     await database.refresh(user)
     
-    return user
-
-@router.get(
-    "",
-    response_model = list[UserPrivate]
-)
-async def get_all_users(database: Annotated[AsyncSession, Depends(get_database)]):
-    result = await database.execute(select(models.User))
-    users = result.scalars().all()
-
-    return users
-
-@router.get(
-    "/{user_id}",
-    response_model = UserPrivate
-)
-async def get_specific_user(user_id: int, database: Annotated[AsyncSession, Depends(get_database)]):
-    user = await get_user_by_id(user_id, database)
-
     return user
