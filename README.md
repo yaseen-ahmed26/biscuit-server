@@ -1,20 +1,22 @@
 # Biscuit Backend
-This is the Server of the 'Biscuit' Project.
+This is the server for the 'Biscuit' project.
 
 ![Diagram of the project](images/diagram.jpg)
-Diagram of the project created just before the project began development.
+Diagram of the project created before development began.
 
-Development notes: [NOTES.md](docs/NOTES.md). Includes sections on challenges solved, decsions made etc.
+Development Notes: [NOTES.md](docs/NOTES.md). Challenges solved, decisions made.
+
+Roadmap Notes: [ROADMAP.md](docs/ROADMAP.md). The current v2 plan.
 
 ---
 
 ### Repositories
-[Game](https://github.com/yaseen-ahmed26/biscuit-game.git) | [Website](https://github.com/yaseen-ahmed26/biscuit-website.git)
+[Game](https://github.com/yaseen-ahmed26/biscuit-game) | [Website](https://github.com/yaseen-ahmed26/biscuit-website)
 
 ---
 
 ### Tech
-- **Language**: Python 3.12.3
+- **Language**: Python
 
 - **Framework**: FastAPI
 
@@ -25,7 +27,11 @@ Development notes: [NOTES.md](docs/NOTES.md). Includes sections on challenges so
 ---
 
 ### About
-This is the backend that handles user account creation, account linking and managing game saves.
+The backend handles:
+
+- **Account creation, updating, deletion**
+- **Account linking between the website and the game**
+- **Game save management**
 
 Routes:
 - **users**: Account creation, deletion, updates and login.
@@ -39,10 +45,12 @@ Routes:
 ### Future Features
 
 Technical:
-- **Refresh Tokens**: Currently the user gets logged out every 30 minutes. Refresh tokens persist and allows the users to stay in longer.
+- **Refresh Tokens**
 
-- **JWT Tokens for Godot**: To get or update a user's game save, it passes through the save ID. This is not secure and can be easily intercepted so using a JWT token can be used to verify ownership
-.
-- **Verify account and reset password emails**: Send various email such as welcome, verify and reset password.
+- **JWT Tokens for Godot**
 
-- **PostgreSQL and Alembic**: SQLite is good for development but not for deployment. Alembic is used whenever a new column or table must be added to the database and it will migrate the existing user data.
+- **Verify account and reset password emails**
+
+- **PostgreSQL and Alembic**
+
+More information can be found in roadmap notes.
