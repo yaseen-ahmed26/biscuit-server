@@ -1,4 +1,6 @@
 # ------- IMPORTS -------
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_swagger_ui_theme import setup_swagger_ui_theme
@@ -61,6 +63,12 @@ setup_swagger_ui_theme(
     app, 
     docs_path = "/docs", 
     title = "Swagger Docs"
+)
+
+# Logger
+logging.basicConfig(
+    format = "[%(levelname)s] %(message)s",
+    level = logging.INFO
 )
 
 # ------- HOME -------

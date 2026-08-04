@@ -1,3 +1,6 @@
+
+import logging
+
 from fastapi import status, HTTPException, Depends, APIRouter, WebSocket, WebSocketDisconnect
 
 from datetime import datetime, UTC, timedelta
@@ -19,6 +22,7 @@ from app.constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class ConnectionManager:
     def __init__(self):
@@ -35,7 +39,8 @@ class ConnectionManager:
             try:
                 await websocket.close()
             except Exception as error:
-                print(f"An error occurred closing the websocket: {error}")
+                logger.error("Websocket failed to close for Client %s: %s", login_code, error)
+
 
     async def send_text_message(self, login_code, message: str):
         websocket = self.active_connections.get(login_code)
@@ -89,6 +94,8 @@ async def start_websocket(
             "login_code": login_code,
         })
 
+        logger.info("Client %s has connected", login_code)
+
         while True:
             remaining_time = (expires_at - datetime.now(UTC)).total_seconds()
             
@@ -101,16 +108,16 @@ async def start_websocket(
             )
 
     except asyncio.TimeoutError:
-        print("Websocket timed out")
+        logger.info("Client %s has timed out", login_code)
 
         await manager.send_json_message(login_code, {
             "type": "expired",
             "detail": "websocket has expired"
         })
     except WebSocketDisconnect:
-        print("Client disconnected")
+        logger.info("Client %s has disconnected", login_code)
     except Exception as error:
-        print(f"An error occurred: {error}")
+        logger.warning("Client %s has encountered an error: %s", login_code, error)
     finally:
         if login_code is not None:
             result = await database.execute(
