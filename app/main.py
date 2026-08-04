@@ -5,9 +5,9 @@ from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 
 from contextlib import asynccontextmanager
 
-from database import Base, engine
-from routes import users, codes, saves, auth
-from constants import ORIGINS
+from app.database import Base, engine
+from app.routes import users, codes, saves, auth
+from app.constants import ORIGINS
 
 # ------- CONSTANTS -------
 ROUTERS = [

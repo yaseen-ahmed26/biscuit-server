@@ -8,16 +8,14 @@ from sqlalchemy.orm import selectinload
 
 from typing import Annotated
 
-from schemas import CodeResponse, Code, WebsocketMetadata
-from database import get_database
-import models
-
-from security import CurrentUser
-from helpers import generate_id
-
 import asyncio
 
-from constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
+from app.schemas import CodeResponse, Code, WebsocketMetadata
+from app.database import get_database
+import app.models as models
+from app.security import CurrentUser
+from app.helpers import generate_id
+from app.constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()

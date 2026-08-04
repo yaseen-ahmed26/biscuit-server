@@ -6,11 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import SaveResponse, SaveUpdate, LeaderboardUser
-from database import get_database
-import models
-
-from helpers import get_save_file, get_user_by_id
+from app.schemas import SaveResponse, SaveUpdate, LeaderboardUser
+from app.database import get_database
+import app.models as models
+from app.helpers import get_save_file, get_user_by_id
 
 # ------- SETUP -------
 router = APIRouter()

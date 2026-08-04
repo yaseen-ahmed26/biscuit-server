@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Float, JSON, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
-from constants import (
+from app.database import Base
+from app.constants import (
     USERNAME_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
     PASSWORD_HASH_MAX_LENGTH,

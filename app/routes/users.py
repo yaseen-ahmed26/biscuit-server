@@ -4,30 +4,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from schemas import (
+from app.schemas import (
     UserCreate, 
     UserUpdate, 
     UserPrivate, 
     UserSave,
 )
-
-from helpers import (
+from app.helpers import (
     generate_id,
     compare_user_id,
     get_user_by_id, 
     check_username_exists,
     check_email_exists
 )
-
-from database import get_database
-import models
-
-from security import (
+from app.database import get_database
+import app.models as models
+from app.security import (
     hash_password, 
     verify_password,
     CurrentUser
 )
-from constants import DEFAULT_PLAYER_STATS, SAVE_ID_LENGTH
+from app.constants import DEFAULT_PLAYER_STATS, SAVE_ID_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()

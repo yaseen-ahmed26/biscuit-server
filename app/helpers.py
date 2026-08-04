@@ -6,8 +6,8 @@ from fastapi import status, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import models
-from constants import ALPHANUMERIC_SET
+import app.models as models
+from app.constants import ALPHANUMERIC_SET
 
 # ------- FUNCTIONS -------
 def generate_id(size: int = 5):

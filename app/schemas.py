@@ -1,5 +1,4 @@
 # ------- IMPORTS -------
-
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -8,7 +7,8 @@ from pydantic import (
 )
 
 from datetime import datetime
-from constants import LOGIN_CODE_LENGTH
+
+from app.constants import LOGIN_CODE_LENGTH
 
 # ------- SCHEMAS -------
 # Users

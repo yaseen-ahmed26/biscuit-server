@@ -14,11 +14,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import settings
-import models
-from database import get_database
-from helpers import generate_id
-from constants import REFRESH_TOKEN_LENGTH
+from app.config import settings
+import app.models as models
+from app.database import get_database
+from app.helpers import generate_id
+from app.constants import REFRESH_TOKEN_LENGTH
 
 # ------- SETUP -------
 password_hash = PasswordHash.recommended()

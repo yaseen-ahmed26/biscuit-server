@@ -9,17 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from database import get_database
-import models
-
-from security import (
+from app.database import get_database
+import app.models as models
+from app.security import (
     create_access_token, 
     verify_password,
     create_refresh_token,
     hash_refresh_token,
 )
-
-from config import settings
+from app.config import settings
 
 # ------- SETUP -------
 router = APIRouter()
