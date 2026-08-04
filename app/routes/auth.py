@@ -61,6 +61,7 @@ async def login(
 		value = plain_token,       
 		secure = True,        
 		httponly = True,
+        samesite = "none",
         path = "/",
         max_age = 7 * 24 * 3600
     )
@@ -70,6 +71,7 @@ async def login(
         value = access_token,       
         secure = True,        
         httponly = True,
+        samesite = "none",
         path = "/",
         max_age = 7200
     )
