@@ -155,6 +155,7 @@ async def get_new_token(
         value = plain_token,       
         secure = True,        
         httponly = True,
+        samesite = "none",
         path = "/",
         max_age = 7 * 24 * 3600
     )
@@ -164,6 +165,7 @@ async def get_new_token(
         value = access_token,       
         secure = True,        
         httponly = True,
+        samesite = "none",
         path = "/",
         max_age = 3600
     )
