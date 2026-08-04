@@ -1,6 +1,7 @@
 # main.py
 ORIGINS = [
-    "http://127.0.0.1:5500"
+    "http://127.0.0.1:5500",
+    "https://yaseen-ahmed26.github.io"
 ]
 
 # users.py, models.py
