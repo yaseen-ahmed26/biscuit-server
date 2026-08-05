@@ -1,11 +1,6 @@
 # Project Notes
-This is some personal notes based off the project. Mix of what things mean, what different tools I'm using do, analogies etc.
+Challenges solved, designs notes etc.
 
-[Version 1](#version-1): June 27th, 2026 - July 20th, 2026
-
-[Version 2](#version-2): July 23rd, 2026 - //
-
-## Version 1
 ### 1. Fixed Issues and Challenges
 1. **Type Errors**: In schemas.py, the created_at for all schemas was set to a string, rather than a datetime object itself. Caused the request to fail (500 internal server error) because I was doing .datetime.today() on a field that required a string.
 
@@ -25,114 +20,52 @@ This is some personal notes based off the project. Mix of what things mean, what
 
 9. **Lazy Loading**: FastAPI required some data, but the user object didn't have it. But SQLAlchemy wasn't allowed to load it alongside and so needed a database query.
 
----
-### Notes
-- There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.
-- When adding new fields to SQLite, it is often better to just delete the old database file and let it create a new one. In real production, you'd use migrations so you don't wipe existing user data.
-- Never store raw passwords in the database if it gets stolen, bye bye data and hello lawsuits.
-- A .env file is for secret environment variables, basically if you have top secret CIA files we don't want people to see. Include in gitignore, that's cruical.
-- Difference between encryption and hashing is that the former is reversable, the latter is not. Argon2 generates a differnt salt for every password, the same password can have differnt hashes.
-- For security, don't reveal what went wrong when failing to login. Don't which is incorrect (password or email). Or just lie and say the password is incorrect when its the email.
-- Best practise to organise routes, with paramiticised ones at the end.
-- You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
-- You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distinguish the difference. This is also standard practicse.
-- When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
-- session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
-- ~~Removed local_id from saves because it wasn't being used. It will be used for sessions instead.~~ Going back to this original idea. Godot will simply store the local_id (now save_id) locally and use that to get the save data when starting up. The downside is there can only be 1 logged in device at a time, later on this'll change to the new sessions idea.
-- Temporarily doing save_id, it's not secure but I will leave it like this for now.
-- Should seperate UserBase into GameSave which only contains the game data and SaveBase which has the user_id
+10. **Remember to add new routers to main.py**: I spent 30 minutes trying to figure out why the /refresh endpoint wasn't working. Only to realise I didn't add it to the main.py.
 
-## Version 2
-### 1. Fixed Issues and Challenges
-1. **Remember to add new routers to main.py**: I spent 30 minutes trying to figure out why the /refresh endpoint wasn't working. Only to realise I didn't add it to the main.py.
+11. **Paramaters need type hints of defaults**: Got a 422 in /refresh endpoint because there was a param user_info with no default type hint. So Pydantic was confused and FastAPI defaulted it to a query paramter which wasn't in the URL.
 
-2. **Paramaters need type hints of defaults**: Got a 422 in /refresh endpoint because there was a param user_info with no default type hint. So Pydantic was confused and FastAPI defaulted it to a query paramter which wasn't in the URL.
+12. **Circular imports**: Tried to move the new routers list in main.py to constants.py. Then it created a loop where it loaded codes.py, but during when constants.py wasn't fully initialized. So the imports codes.py got from constants.py haven't been loaded yet. So just keep that routers list in main.py.
 
-3. **Circular imports**: Tried to move the new routers list in main.py to constants.py. Then it created a loop where it loaded codes.py, but during when constants.py wasn't fully initialized. So the imports codes.py got from constants.py haven't been loaded yet. So just keep that routers list in main.py.
-
-4. **Cookie paths matter**: Refresh token path was only set to the /refresh token meaning it wasn't sent to anything else, so the database couldn't delete it. 
+13. **Cookie paths matter**: Refresh token path was only set to the /refresh token meaning it wasn't sent to anything else, so the database couldn't delete it. 
 
 ---
 ### 2. Notes
+- There cannot be any trailing commas when testing out in Swagger. Gives a 422 JSON Decode error otherwise.
+
+- When adding new fields to SQLite, it is often better to just delete the old database file and let it create a new one. In real production, you'd use migrations so you don't wipe existing user data.
+
+- Never store raw passwords in the database if it gets stolen, bye bye data and hello lawsuits.
+
+- A .env file is for secret environment variables, basically if you have top secret CIA files we don't want people to see. Include in gitignore, that's cruical.
+
+- Difference between encryption and hashing is that the former is reversable, the latter is not. Argon2 generates a differnt salt for every password, the same password can have differnt hashes.
+
+- For security, don't reveal what went wrong when failing to login. Don't which is incorrect (password or email). Or just lie and say the password is incorrect when its the email.
+
+- Best practise to organise routes, with paramiticised ones at the end.
+
+- You have to keep the websocket open, otherwise FastAPI thinks the client is dead. Even if the client is not expected to send anything, we still have to check to keep the connection alive.
+
+- You can in fact do login_code = login_code. Python and SQLAlchemy passed year 8 and can distinguish the difference. This is also standard practicse.
+
+- When verifying the code, we don't need to then delete the database row. When the websocket is closed, it already does it in the finally block of try/except.
+
+- session_id wasn't really needed, since every login code is unique, that can be used as the session ID.
+
+- ~~Removed local_id from saves because it wasn't being used. It will be used for sessions instead.~~ 
+    - Going back to this original idea. Godot will simply store the local_id (now save_id) locally and use that to get the save data when starting up. The downside is there can only be 1 logged in device at a time, later on this'll change to the new sessions idea.
+
+- Temporarily doing save_id, it's not secure but I will leave it like this for now.
+
+- Should seperate UserBase into GameSave which only contains the game data and SaveBase which has the user_id
+
 - By default, refresh tokens are attached to all API requests which isn't necessary or safe. Restrict the path to only the route it should be attached to, in this case, refresh.
+
 - Also by default, the token will disappear once the user closes the browser which defeats the purpose of refresh tokens. 7 * 24 * 3600 is exactly 7 days.
-- No data is needed for /refresh endpoint so can remove the schema. Also, need to check if the refresh token is empty (None)
+
+- ~~No data is needed for /refresh endpoint so can remove the schema. Also, need to check if the refresh token is empty (None)~~
+    - Removed.
+
 - Refactor auth/login and auth/refresh to be less duplicated. Can have 2 helpers, one for each token type.
+
 - You can have custom websocket expiry codes. There are specific ranges, 1000-3000 is the standard codes like 1000 for noraml closure. 3000-4000 is for specific libraries or frameworks. Then 4000-5000 is custom codes. Good to have so the client can much easier know what happened rather than trying to parse JSON.
-
-## LEARNING
-### 1. Tools
-**Python**: The programming language
-
-**FastAPI**: The backend framework being used
-
-**SQLite**: The database being used
-
-**SQLAlchemy**: The ORM* used to talk in Python to the database instead of raw SQL
-
-**Pydantic**: FastAPI data validation for data coming in and going out of the backend
-
----
-### 2. Packages
-**FastAPI, SQLAlchemy**: ^
-
-**Passlib (Argon2)**: Used for password hashing. Argon2 is the more modern and more resistant to GPU cracking attacks.
-
-**Pyjwt**: Library recommended to use with FastAPI, simple and focused for JWT tokens.
-
-**Nanoid**: Used to generate short codes and IDs.
-
----
-### 3. Jargon
-**API (Application Programming Interface)**: The 'waiter' (FastAPI) between the 'kitchen' (database) and the 'customer' (the client, e.g. web, mobile, game)
-
-**Endpoint**: The location where the backend receives API calls for data. It is the specific URL and HTTP method (e.g. GET /api/posts)
-
-***ORM (Object Relational Mapping)**: Instead of writing raw prone-to-error SQL, an ORM (in this case, SQLAlchemy) allows for accessing the database record as though they were regular Python objects. 
-
-**Schemas**: Data blueprints for Pydantic to use
-
-**Models**: A table within the database for holding specific information away from everything else
-
-**Dependency Injection**: A way to tell FastAPI "hey, this function depends on another external tool. Get that tool first before running this". In this case, it'll likely be a database connection or validating tokens
-
-**Session**: A temporary workspace opened to the database for a single request, then is automagically closed
-
-**Authentication**: Answers the question of "Who are you?". Once authenticated (logged in), user receives a token.
-
-**Authorisation**: Answers the question of "What are you allowed to do?". Once a user is logged in, they can only do certain actions. For example, an admin can delete any posts whereas a user can only delete theirs.
-
-**JWT (Json Web Tokens)**: A token given to the frontend client when the user logs in. That token is needed for protected routes, such as updating user settings.
-
-**Password Hashing**: Scramble the password with a unique salt for every different password (even if the password itself is the same)
-
-**Websockets**: A way to have 2 way persistent communication between the client and server. With regular HTTP request, it can only be inititated by the client
-
----
-### 4. HTTP Codes
-**200**: (Success) General request was successful
-
-**201**: (Success) A new resource was created
-
-**204**: (Success) No content received
-
-**400**: (Error) The client sent data that the server invalidated
-
-**401**: (Error) "I don't know who you are"
-
-**403**: (Error): You don't have permission to do this
-
-**404**: (Error) Content was not found
-
-**422**: (Error) Request could not be processed due to missing or invalid fields
-
----
-### 5. Additional
-- python -c "import secrets; print(secrets.token_hex(32))"
-Run this command in the terminal for a super super secret key.
-
-- JSON Web Tokens (JWT) Structure
-It has 3 parts. (1) Header: contains the algorithm and type. (2) Payload: contains the data and expiration. (3) Signature: proves the token wasn't tampered with. Signature is created with our secret key meaning only our server can create valid tokens.
-
-- cascade = "all, delete-orphan"
-Doing this in a relationship tells SQLAlchemy to also delete the associated save data. If then that save data becomes an orphan and isn't connected to a user, then delete it. Also automagically saves it to the database when a new save is made.
