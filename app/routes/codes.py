@@ -175,7 +175,7 @@ async def verify(
             "owned_unlocks": user.save.owned_unlocks,
         }
     })
-    await asyncio.sleep(0.05)
-    await manager.disconnect(existing_code.login_code)
+    # await asyncio.sleep(0.05)
+    # await manager.disconnect(existing_code.login_code)
         
     return existing_code

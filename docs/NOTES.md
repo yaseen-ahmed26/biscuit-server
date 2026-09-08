@@ -69,3 +69,5 @@ Challenges solved, designs notes etc.
 - Refactor auth/login and auth/refresh to be less duplicated. Can have 2 helpers, one for each token type.
 
 - You can have custom websocket expiry codes. There are specific ranges, 1000-3000 is the standard codes like 1000 for noraml closure. 3000-4000 is for specific libraries or frameworks. Then 4000-5000 is custom codes. Good to have so the client can much easier know what happened rather than trying to parse JSON.
+
+- The client should be the one to close the websocket if/when it successfully recieves the data. The server should only clean it up if it expires.
