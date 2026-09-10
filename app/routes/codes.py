@@ -172,7 +172,7 @@ async def verify(
     )
 
     plain_token, hashed_token = create_refresh_token()
-    expires_at = datetime.now() + timedelta(days = 7)
+    expires_at = datetime.now(UTC) + timedelta(days = 7)
 
     await manager.send_json_message(existing_code.login_code, {
         "type": "user_data",

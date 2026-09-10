@@ -55,7 +55,7 @@ async def login(
     )
 
     plain_token, hashed_token = create_refresh_token()
-    expires_at = datetime.now() + timedelta(days = 7)
+    expires_at = datetime.now(UTC) + timedelta(days = 7)
 
     response.set_cookie(        
 		key = "refresh_token",        
@@ -143,7 +143,7 @@ async def get_new_token(
             detail = "refresh token already used"
         )
 
-    if stored_token.expires_at < datetime.now():
+    if stored_token.expires_at < datetime.now(UTC):
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "refresh token is expired"
@@ -157,7 +157,7 @@ async def get_new_token(
     )
 
     plain_token, hashed_token = create_refresh_token()
-    expires_at = datetime.now() + timedelta(days = 7)
+    expires_at = datetime.now(UTC) + timedelta(days = 7)
     
     response.set_cookie(        
         key = "refresh_token",        
