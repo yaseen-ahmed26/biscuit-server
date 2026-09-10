@@ -18,6 +18,7 @@ from app.security import (
     hash_refresh_token,
 )
 from app.config import settings
+from app.schemas import RefreshBody
 
 # ------- SETUP -------
 router = APIRouter()
@@ -93,15 +94,23 @@ async def login(
 async def get_new_token(
     database: Annotated[AsyncSession, Depends(get_database)],
     response: Response,
+    refresh_body: RefreshBody = None,
     refresh_token: Annotated[str | None, Cookie()] = None
 ):
-    if refresh_token is None:
+    token = None
+    
+    if refresh_token is None and refresh_body is None or refresh_body.refresh_token is None:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "no refresh token provided"
         )
-    
-    hashed_token = hash_refresh_token(refresh_token)
+
+    if not refresh_body is None and not refresh_body.refresh_token is None:
+        token = refresh_body.refresh_token
+    elif not refresh_token is None:
+        token = refresh_token
+
+    hashed_token = hash_refresh_token(token)
     
     result = await database.execute(
         select(models.Session)
@@ -181,6 +190,11 @@ async def get_new_token(
 
     database.add(new_session)
     await database.commit()
+
+    return {
+        "access_token": access_token,
+        "refresh_token": plain_token
+    }
 
 @router.post(
     "/logout",

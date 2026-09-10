@@ -43,6 +43,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class RefreshBody(BaseModel):
+    refresh_token: str | None = Field(default = None)
+
 # Codes
 class Code(BaseModel):
     login_code: str = Field(min_length = LOGIN_CODE_LENGTH, max_length = LOGIN_CODE_LENGTH)
