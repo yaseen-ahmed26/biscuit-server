@@ -16,12 +16,6 @@ Also note that the future features on the README were not final.
 
 Ideas
 
-[ ] **JWT tokens to Godot**
-- Can likely just use refresh tokens and it should work the same way.
-- Would need to edit get_save endpoint to check for a valid refresh token
-    - Access token would contain the user's ID so no ened to store locally.
-- Much more reliable than the current save IDs being used.
-
 [?] **Resend emails (welcome, verify, reset password)**
 - Possible, would need a domain.
 - Keep simple for now, just a welcome email.
@@ -35,6 +29,22 @@ Ideas
 [ ] **Convert to PostgreSQL**
 - 2 options, either use PostgreSQL with Docker and switch out the URLs or continue to use SQLite locally and only use PostgreSQL for deployment.
     - The latter works but we should mirror production during development as close as possible.
+
+[ ] **Rate limiting**
+- Rate limting to some endpoints especially for leaderboards
+
+[ ] **Last updated timestamp**
+- Add a last updated timestamp so the server can compare saves.
+- Done to prevent older saves overwriting new ones.
+
+[ ] **Basic Server Side Anti-Cheat**
+- Using the above timestamp, do a small calculation to ensure the user cannot exceed a certain amount of cookies in a short time.
+    - For example, if the difference between the last save and the current is 3 minutes, and the max amount of cookies per click is around 120 and the average click speed is 6/s, don't allow anything that exceeds this.
+    - The formula would be: max_amount_biscuits = seconds_elapsed * average_click_speed * biscuits_per_click * buffer. The numbers would be something like 180 * 8 * 120 * 3. If the user exceeds this, it is likely they cheated and manually set their biscuits to something like 99999999999. 
+
+[ ] **is_connected Flag for Users**
+- Flip when the user connects their account to the game for the first time.
+- Helps with game side bonuses, to not apply them multiple times.
 
 ---
 
@@ -62,3 +72,9 @@ Completed
 
 [✓] **Add websocket expiration time (2 mins)**
 - Compare the expires_at column and the current time, then just close the websocket.
+
+[✓] **JWT tokens to Godot**
+- Can likely just use refresh tokens and it should work the same way.
+- Would need to edit get_save endpoint to check for a valid refresh token
+    - Access token would contain the user's ID so no ened to store locally.
+- Much more reliable than the current save IDs being used.

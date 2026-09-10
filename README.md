@@ -6,7 +6,7 @@ Diagram of the project created before development began.
 
 Development Notes: [NOTES.md](docs/NOTES.md). Challenges solved, decisions made.
 
-Roadmap Notes: [ROADMAP.md](docs/ROADMAP.md). The current v2 plan.
+Idea Notes: [IDEAS.md](docs/IDEAS.md). Some ideas that may be implemented.
 
 ---
 
