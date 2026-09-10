@@ -10,6 +10,7 @@ from app.schemas import SaveResponse, SaveUpdate, LeaderboardUser
 from app.database import get_database
 import app.models as models
 from app.helpers import get_save_file, get_user_by_id
+from app.security import CurrentUser
 
 # ------- SETUP -------
 router = APIRouter()
@@ -41,24 +42,27 @@ async def get_leaderboard(
     return top_saves
 
 @router.get(
-    "/{save_id}",
+    "/me",
     response_model = SaveResponse
 )
-async def get_save_data(save_id: str, database: Annotated[AsyncSession, Depends(get_database)]):
-    existing_save = await get_save_file(save_id, database)
+async def get_save_data(
+    current_user: CurrentUser, 
+    database: Annotated[AsyncSession, Depends(get_database)]
+):
+    existing_save = await get_save_file(current_user.save.save_id, database)
     
     return existing_save
 
 @router.put(
-    "/{save_id}",
+    "/me",
     response_model = SaveResponse
 )
 async def update_save(
-    save_id: str, 
+    current_user: CurrentUser, 
     new_save: SaveUpdate,
     database: Annotated[AsyncSession, Depends(get_database)]
 ):
-    existing_save = await get_save_file(save_id, database)
+    existing_save = await get_save_file(current_user.save.save_id, database)
 
     update_data = new_save.model_dump(exclude_unset = True)
 
