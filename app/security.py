@@ -22,7 +22,7 @@ from app.constants import REFRESH_TOKEN_LENGTH
 
 # ------- SETUP -------
 password_hash = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "api/users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "api/users/token", auto_error = False)
 
 # ------- FUNCTIONS -------
 def hash_password(password: str) -> str:
@@ -77,9 +77,19 @@ def verify_refresh_token(plain_token: str, stored_token: str):
     
 async def get_current_user(
     database: Annotated[AsyncSession, Depends(get_database)],
-    access_token: Annotated[str | None, Cookie()] = None
+    access_token: Annotated[str | None, Cookie()] = None,
+    header_token: Annotated[str | None, Depends(oauth2_scheme)] = None
 ) -> models.User:
-    user_id = verify_access_token(access_token)
+    token = header_token or access_token
+    
+    if token is None:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "not authenticated",
+            headers = {"WWW-Authenticate": "Bearer"}
+        )
+    
+    user_id = verify_access_token(token)
 
     if user_id is None:
         raise HTTPException(

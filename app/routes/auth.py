@@ -99,7 +99,7 @@ async def get_new_token(
 ):
     token = None
     
-    if refresh_token is None and refresh_body is None or refresh_body.refresh_token is None:
+    if refresh_token is None and refresh_body is None:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "no refresh token provided"
