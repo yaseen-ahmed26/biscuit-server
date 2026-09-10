@@ -16,9 +16,15 @@ import asyncio
 from app.schemas import CodeResponse, Code, WebsocketMetadata
 from app.database import get_database
 import app.models as models
-from app.security import CurrentUser
 from app.helpers import generate_id
 from app.constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
+from app.security import (
+    create_access_token, 
+    create_refresh_token,
+    hash_refresh_token,
+    CurrentUser
+)
+from app.config import settings
 
 # ------- SETUP -------
 router = APIRouter()
@@ -159,9 +165,19 @@ async def verify(
     )
     user = result.scalars().first()
 
+    access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data = {"sub": str(current_user.id)},
+        expires_delta = access_token_expires,
+    )
+
+    plain_token, hashed_token = create_refresh_token()
+    expires_at = datetime.now() + timedelta(days = 7)
+
     await manager.send_json_message(existing_code.login_code, {
         "type": "user_data",
-        "save_id": user.save.save_id,
+        "access_token": access_token,
+        "refresh_token": plain_token,
         "username": user.username,
         "save": {
             "biscuits": user.save.biscuits,
@@ -175,7 +191,15 @@ async def verify(
             "owned_unlocks": user.save.owned_unlocks,
         }
     })
-    # await asyncio.sleep(0.05)
-    # await manager.disconnect(existing_code.login_code)
+
+    new_session = models.Session(
+        user_id = user.id,
+        token_hash = hashed_token,
+        expires_at = expires_at,  
+        expired = False
+    )
+    
+    database.add(new_session)
+    await database.commit()
         
     return existing_code
