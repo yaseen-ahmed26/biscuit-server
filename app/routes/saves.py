@@ -1,5 +1,6 @@
 # ------- IMPORTS -------
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException, status
+from datetime import datetime, UTC
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,8 @@ from app.database import get_database
 import app.models as models
 from app.helpers import get_save_file, get_user_by_id
 from app.security import CurrentUser
+
+from app.constants import MAX_AMOUNT_BISCUITS_CLICK, AVERAGE_CLICK_SPEED_SECOND, BISCUIT_BUFFER, MAX_SESSION_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()
@@ -62,10 +65,23 @@ async def update_save(
 ):
     existing_save = current_user.save
 
+    seconds_elapsed = int((datetime.now(UTC) - existing_save.last_saved_at.replace(tzinfo = UTC)).total_seconds())
+    total_session = min(seconds_elapsed, MAX_SESSION_LENGTH)
+
+    max_allowed_gain = total_session * MAX_AMOUNT_BISCUITS_CLICK * AVERAGE_CLICK_SPEED_SECOND * BISCUIT_BUFFER
+
+    if new_save.biscuits > max_allowed_gain:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "biscuits exceed the max theoretical gain, player may have cheated"
+        )
+
     update_data = new_save.model_dump(exclude_unset = True)
 
     for field, value in update_data.items():
         setattr(existing_save, field, value)
+
+    existing_save.last_saved_at = datetime.now(UTC)
 
     await database.commit()
     await database.refresh(existing_save)
