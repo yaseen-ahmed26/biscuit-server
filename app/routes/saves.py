@@ -48,10 +48,8 @@ async def get_leaderboard(
 async def get_save_data(
     current_user: CurrentUser, 
     database: Annotated[AsyncSession, Depends(get_database)]
-):
-    existing_save = await get_save_file(current_user.save.save_id, database)
-    
-    return existing_save
+):    
+    return current_user.save
 
 @router.put(
     "/me",
@@ -62,7 +60,7 @@ async def update_save(
     new_save: SaveUpdate,
     database: Annotated[AsyncSession, Depends(get_database)]
 ):
-    existing_save = await get_save_file(current_user.save.save_id, database)
+    existing_save = current_user.save
 
     update_data = new_save.model_dump(exclude_unset = True)
 
