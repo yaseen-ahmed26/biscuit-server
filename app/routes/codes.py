@@ -179,6 +179,7 @@ async def verify(
         "access_token": access_token,
         "refresh_token": plain_token,
         "username": user.username,
+        "game_connected": user.game_connected,
         "save": {
             "biscuits": user.save.biscuits,
             "total_biscuits": user.save.total_biscuits,
@@ -191,6 +192,9 @@ async def verify(
             "owned_unlocks": user.save.owned_unlocks,
         }
     })
+
+    if not user.game_connected:
+        user.game_connected = True
 
     new_session = models.Session(
         user_id = user.id,
