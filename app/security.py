@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Response
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -74,6 +74,38 @@ def create_refresh_token():
 def verify_refresh_token(plain_token: str, stored_token: str):
     incoming_hash = hash_refresh_token(plain_token)
     return compare_digest(incoming_hash, stored_token)
+
+async def set_cookies(user_id: int, response: Response):
+    access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data = {"sub": str(user_id)},
+        expires_delta = access_token_expires,
+    )
+
+    plain_token, hashed_token = create_refresh_token()
+    refresh_token_expires = datetime.now(UTC) + timedelta(days = 7)
+
+    response.set_cookie(        
+        key = "refresh_token",        
+        value = plain_token,       
+        secure = True,        
+        httponly = True,
+        samesite = "none",
+        path = "/",
+        max_age = refresh_token_expires
+    )
+
+    response.set_cookie(        
+        key = "access_token",        
+        value = access_token,       
+        secure = True,        
+        httponly = True,
+        samesite = "none",
+        path = "/",
+        max_age = 7200
+    )
+
+    return plain_token, hashed_token, refresh_token_expires, access_token
     
 async def get_current_user(
     database: Annotated[AsyncSession, Depends(get_database)],

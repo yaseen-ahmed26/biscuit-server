@@ -16,6 +16,7 @@ from app.security import (
     verify_password,
     create_refresh_token,
     hash_refresh_token,
+    set_cookies
 )
 from app.config import settings
 from app.schemas import RefreshBody
@@ -47,40 +48,12 @@ async def login(
             headers = {"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
-
-    access_token = create_access_token(
-        data = {"sub": str(user.id)},
-        expires_delta = access_token_expires,
-    )
-
-    plain_token, hashed_token = create_refresh_token()
-    expires_at = datetime.now(UTC) + timedelta(days = 7)
-
-    response.set_cookie(        
-		key = "refresh_token",        
-		value = plain_token,       
-		secure = True,        
-		httponly = True,
-        samesite = "none",
-        path = "/",
-        max_age = 7 * 24 * 3600
-    )
-
-    response.set_cookie(        
-        key = "access_token",        
-        value = access_token,       
-        secure = True,        
-        httponly = True,
-        samesite = "none",
-        path = "/",
-        max_age = 7200
-    )
+    plain_refresh, hashed_refresh, refresh_expires, access_token = await set_cookies(user.id, response)
 
     new_session = models.Session(
         user_id = user.id,
-        token_hash = hashed_token,
-        expires_at = expires_at,  
+        token_hash = hashed_refresh,
+        expires_at = refresh_expires,  
         expired = False
     )
 
@@ -143,46 +116,23 @@ async def get_new_token(
             detail = "refresh token already used"
         )
 
-    if stored_token.expires_at < datetime.now(UTC):
+    expires_at = stored_token.expires_at
+    
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+
+    if expires_at < datetime.now(UTC):
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = "refresh token is expired"
         )
 
-    access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
-    
-    access_token = create_access_token(
-        data = {"sub": str(stored_token.user_id)},
-        expires_delta = access_token_expires,
-    )
-
-    plain_token, hashed_token = create_refresh_token()
-    expires_at = datetime.now(UTC) + timedelta(days = 7)
-    
-    response.set_cookie(        
-        key = "refresh_token",        
-        value = plain_token,       
-        secure = True,        
-        httponly = True,
-        samesite = "none",
-        path = "/",
-        max_age = 7 * 24 * 3600
-    )
-
-    response.set_cookie(        
-        key = "access_token",        
-        value = access_token,       
-        secure = True,        
-        httponly = True,
-        samesite = "none",
-        path = "/",
-        max_age = 3600
-    )
+    plain_refresh, hashed_refresh, refresh_expires, access_token = await set_cookies(stored_token.user_id, response)
 
     new_session = models.Session(
         user_id = stored_token.user_id,
-        token_hash = hashed_token,
-        expires_at = expires_at,  
+        token_hash = hashed_refresh,
+        expires_at = refresh_expires,  
         expired = False
     )
 
@@ -193,7 +143,7 @@ async def get_new_token(
 
     return {
         "access_token": access_token,
-        "refresh_token": plain_token
+        "refresh_token": plain_refresh
     }
 
 @router.post(
