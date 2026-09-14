@@ -23,6 +23,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(EMAIL_MAX_LENGTH), unique = True, nullable = False)
     password_hash: Mapped[str] = mapped_column(String(PASSWORD_HASH_MAX_LENGTH), nullable = False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), default = lambda: datetime.now(UTC))
+    game_connected: Mapped[bool] = mapped_column(Boolean, default = False)
     save: Mapped["Save"] = relationship(back_populates = "user", cascade = "all, delete-orphan")
 
 class Codes(Base):
@@ -39,6 +40,8 @@ class Save(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key = True)
     user: Mapped[User] = relationship(back_populates = "save")
     save_id: Mapped[str] = mapped_column(String(SAVE_ID_LENGTH), nullable = False)
+    last_saved_at: Mapped[datetime] = mapped_column(DateTime(timezone = True), default = lambda: datetime.now(UTC))
+    version_number: Mapped[float] = mapped_column(Float, default = 0.0)
 
     biscuits: Mapped[float] = mapped_column(Float)
     total_biscuits: Mapped[float] = mapped_column(Float)
