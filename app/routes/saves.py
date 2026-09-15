@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import Annotated
 
-from app.schemas import SaveResponse, SaveUpdate, LeaderboardUser
+from app.schemas import SaveResponse, SaveUpdate, LeaderboardUser, GameSave
 from app.database import get_database
 import app.models as models
 from app.helpers import get_save_file, get_user_by_id
@@ -87,3 +87,20 @@ async def update_save(
     await database.refresh(existing_save)
     
     return existing_save
+
+@router.get(
+    "/{save_id}",
+)
+async def get_stranger_save(
+    save_id: str,
+    database: Annotated[AsyncSession, Depends(get_database)]
+):
+    existing_save = await get_save_file(save_id, database)
+    user = await get_user_by_id(existing_save.user_id, database)
+
+    return {
+        "total_biscuits": existing_save.total_biscuits,
+        "total_clicks": existing_save.total_clicks,
+        "total_playtime": existing_save.total_playtime,
+        "player_username": user.username
+    }

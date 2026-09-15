@@ -71,3 +71,10 @@ Challenges solved, designs notes etc.
 - You can have custom websocket expiry codes. There are specific ranges, 1000-3000 is the standard codes like 1000 for noraml closure. 3000-4000 is for specific libraries or frameworks. Then 4000-5000 is custom codes. Good to have so the client can much easier know what happened rather than trying to parse JSON.
 
 - The client should be the one to close the websocket if/when it successfully recieves the data. The server should only clean it up if it expires.
+
+- Slight change to the anti-cheat.
+    - Since the game autosaves every 3 minutes, any sessions should never exceed that unless when the server or the network is slow which is why an extra minute was added to the calculation.
+    - However this makes offline generation much harder to do, unless there's an artificial cap like only 8 hours offline gen.
+
+- Decided to use Save IDs for the shareable games stats.
+    - The URL won't look good but it is permanent since 1 user can have only 1 save. Also less logic than ensuring the user exists then finding the save, would need another helper for 1 use case.
