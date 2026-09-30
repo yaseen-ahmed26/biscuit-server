@@ -78,3 +78,15 @@ Challenges solved, designs notes etc.
 
 - Decided to use Save IDs for the shareable games stats.
     - The URL won't look good but it is permanent since 1 user can have only 1 save. Also less logic than ensuring the user exists then finding the save, would need another helper for 1 use case.
+
+---
+
+Big change happening, the server will be changed to support multiple game saves.
+
+A few notes:
+- Change to 1:N relationship for saves, 1 user can have N saves.
+- Saves table will accept a generic JSON column, rather than hardcoded ones.
+- A game ID is required so we know what save is for what game.
+- "__table_args__ = (UniqueConstraint("user_id", "game_id", name = "uq_user_game"),)"
+    - Essentially, instead of enforcing a constraint on a single column, this enforces it on the entire row.
+    - A user should not have 2 save files for a single game. This lines ensures that both user_id and game_id are unique.
