@@ -154,18 +154,19 @@ async def logout(
     database: Annotated[AsyncSession, Depends(get_database)],
     refresh_token: Annotated[str | None, Cookie()] = None
 ):
-    hashed_token = hash_refresh_token(refresh_token)
-        
-    result = await database.execute(
-        select(models.Session)
-        .where(models.Session.token_hash == hashed_token)
-    )
+    if refresh_token:
+        hashed_token = hash_refresh_token(refresh_token)
+            
+        result = await database.execute(
+            select(models.Session)
+            .where(models.Session.token_hash == hashed_token)
+        )
 
-    stored_token = result.scalars().first()
+        stored_token = result.scalars().first()
 
-    if stored_token:
-        await database.delete(stored_token)
-        await database.commit()
+        if stored_token:
+            await database.delete(stored_token)
+            await database.commit()
 
     response.delete_cookie(
         key = "access_token",
