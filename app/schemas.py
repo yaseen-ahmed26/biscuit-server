@@ -63,6 +63,7 @@ class WebsocketMetadata(BaseModel):
 # Saves
 class SaveUpdate(BaseModel):
     save_data: dict[str, Any]
+    version_number: float | None = Field(default = None)
 
 class SaveResponse(BaseModel):
     save_id: str   
