@@ -90,3 +90,11 @@ A few notes:
 - "__table_args__ = (UniqueConstraint("user_id", "game_id", name = "uq_user_game"),)"
     - Essentially, instead of enforcing a constraint on a single column, this enforces it on the entire row.
     - A user should not have 2 save files for a single game. This lines ensures that both user_id and game_id are unique.
+- Removing leaderboards
+    - I wasn't happy with how they were anyways. It was a single property with only 5 users.
+    - Doing leaderboards will now be much harder because all the data is JSON. So it will take a long time to sort and get the top X users without a separate leaderboard_stat column.
+- Schemas
+    - GameSave was removed because it hardcoded and assumed everything we got was from one game
+    - UserSave was removed because it bundled together 1 save and the user. Saves should be separate from the account, make a query if you need the save.
+    - LeaderboardUser is no longer needed because we won't have leaderboards
+    - SaveBase was merged with SaveResponse

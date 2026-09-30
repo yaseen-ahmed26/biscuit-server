@@ -7,6 +7,7 @@ from pydantic import (
 )
 
 from datetime import datetime
+from typing import Any
 
 from app.constants import LOGIN_CODE_LENGTH
 
@@ -36,9 +37,6 @@ class UserPublic(BaseModel):
 class UserPrivate(UserPublic):
     email: str
 
-class UserSave(UserPrivate):
-    save: "SaveBase"
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -54,36 +52,22 @@ class CodeResponse(BaseModel):
     login_code: str
     os: str
     country: str
+    game_id: str
+    model_config = ConfigDict(from_attributes = True)
 
 class WebsocketMetadata(BaseModel):
     os: str | None = Field(default = "Unknown", max_length = 25)
     country: str | None = Field(default = "Unknown", max_length = 32)
+    game_id: str = Field(max_length = 32)
 
 # Saves
-class GameSave(BaseModel):
-    biscuits: float
-    total_biscuits: float
-    total_playtime: float
-    total_clicks: int
-    owned_upgrades: dict[str, int]
-    owned_achievements: list[str]
-    prestige: int
-    crumbs: int
-    owned_unlocks: list[str]
+class SaveUpdate(BaseModel):
+    save_data: dict[str, Any]
 
-class SaveBase(GameSave):
+class SaveResponse(BaseModel):
+    save_id: str   
+    game_id: str
+    version_number: float | None = Field(default = None)
+    last_saved_at: datetime   
+    save_data: dict[str, Any]
     model_config = ConfigDict(from_attributes = True)
-
-    save_id: str
-
-class SaveUpdate(GameSave):
-    pass
-
-class SaveResponse(SaveBase):
-    pass
-
-class LeaderboardUser(BaseModel):
-    total_biscuits: float
-    username: str
-
-UserSave.model_rebuild()

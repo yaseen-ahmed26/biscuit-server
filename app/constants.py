@@ -6,17 +6,6 @@ ORIGINS = [
 ]
 
 # users.py, models.py
-DEFAULT_PLAYER_STATS = {
-    "biscuits": 100.0,
-    "total_biscuits": 0.0,
-    "total_playtime": 0.0,
-    "total_clicks": 0,
-    "owned_upgrades": {},
-    "owned_achievements": [],
-    "prestige": 0,
-    "crumbs": 0,
-    "owned_unlocks": []
-}
 SAVE_ID_LENGTH = 32
 
 # codes.py, schemas.py
