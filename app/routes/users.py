@@ -8,10 +8,8 @@ from app.schemas import (
     UserCreate, 
     UserUpdate, 
     UserPrivate, 
-    UserSave,
 )
 from app.helpers import (
-    generate_id,
     compare_user_id,
     get_user_by_id, 
     check_username_exists,
@@ -24,7 +22,6 @@ from app.security import (
     verify_password,
     CurrentUser
 )
-from app.constants import DEFAULT_PLAYER_STATS, SAVE_ID_LENGTH
 
 # ------- SETUP -------
 router = APIRouter()
@@ -32,14 +29,14 @@ router = APIRouter()
 # ------- ENDPOINTS -------
 @router.get(
     "/me", 
-    response_model = UserSave
+    response_model = UserPrivate
 )
 def get_current_user(current_user: CurrentUser):
     return current_user
 
 @router.post(
     "",
-    response_model = UserSave,
+    response_model = UserPrivate,
     status_code = status.HTTP_201_CREATED
 )
 async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, Depends(get_database)]):
@@ -52,16 +49,9 @@ async def create_user(user_info: UserCreate, database: Annotated[AsyncSession, D
         password_hash = hash_password(user_info.password),
     )
 
-    new_save = models.Save(
-        save_id = generate_id(SAVE_ID_LENGTH),
-        **DEFAULT_PLAYER_STATS
-    )
-
-    new_user.save = new_save
-
     database.add(new_user)
     await database.commit()
-    await database.refresh(new_user, attribute_names = ["save"])
+    await database.refresh(new_user)
 
     return new_user
 

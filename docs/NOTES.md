@@ -98,3 +98,5 @@ A few notes:
     - UserSave was removed because it bundled together 1 save and the user. Saves should be separate from the account, make a query if you need the save.
     - LeaderboardUser is no longer needed because we won't have leaderboards
     - SaveBase was merged with SaveResponse
+- No longer create a save when a user is created.
+    - There is no point storing data if the user will never play the game. 
