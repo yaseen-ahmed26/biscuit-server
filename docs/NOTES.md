@@ -99,4 +99,5 @@ A few notes:
     - LeaderboardUser is no longer needed because we won't have leaderboards
     - SaveBase was merged with SaveResponse
 - No longer create a save when a user is created.
-    - There is no point storing data if the user will never play the game. 
+    - There is no point storing data if the user will never play the game.
+- Send back whatever save JSON is associated with the game_id and user_id that is saved in codes.

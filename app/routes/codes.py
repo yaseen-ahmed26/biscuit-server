@@ -7,7 +7,6 @@ from datetime import datetime, UTC, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from typing import Annotated
 
@@ -21,7 +20,6 @@ from app.constants import LOGIN_CODE_EXPIRATION_MINS, LOGIN_CODE_LENGTH
 from app.security import (
     create_access_token, 
     create_refresh_token,
-    hash_refresh_token,
     CurrentUser
 )
 from app.config import settings
@@ -71,7 +69,8 @@ async def generate_websocket_info(database: AsyncSession, metadata):
         login_code = login_code,
         expires_at = expires_at,
         os = metadata.os,
-        country = metadata.country
+        country = metadata.country,
+        game_id = metadata.game_id
     )
 
     database.add(new_code)
@@ -159,11 +158,11 @@ async def verify(
         )
     
     result = await database.execute(
-        select(models.User)
-        .options(selectinload(models.User.save))
-        .where(models.User.id == current_user.id)
+        select(models.Save)
+        .where(models.Save.user_id == current_user.id)
+        .where(models.Save.game_id == existing_code.game_id)
     )
-    user = result.scalars().first()
+    save = result.scalars().first()
 
     access_token_expires = timedelta(minutes = settings.access_token_expire_minutes)
     access_token = create_access_token(
@@ -178,26 +177,12 @@ async def verify(
         "type": "user_data",
         "access_token": access_token,
         "refresh_token": plain_token,
-        "username": user.username,
-        "game_connected": user.game_connected,
-        "save": {
-            "biscuits": user.save.biscuits,
-            "total_biscuits": user.save.total_biscuits,
-            "total_playtime": user.save.total_playtime,
-            "total_clicks": user.save.total_clicks,
-            "owned_upgrades": user.save.owned_upgrades,
-            "owned_achievements": user.save.owned_achievements,
-            "prestige": user.save.prestige,
-            "crumbs": user.save.crumbs,
-            "owned_unlocks": user.save.owned_unlocks,
-        }
+        "username": current_user.username,
+        "save": save.save_data if save else {}
     })
 
-    if not user.game_connected:
-        user.game_connected = True
-
     new_session = models.Session(
-        user_id = user.id,
+        user_id = current_user.id,
         token_hash = hashed_token,
         expires_at = expires_at,  
         expired = False
