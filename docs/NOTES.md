@@ -101,3 +101,7 @@ A few notes:
 - No longer create a save when a user is created.
     - There is no point storing data if the user will never play the game.
 - Send back whatever save JSON is associated with the game_id and user_id that is saved in codes.
+- Saves are no longer 1:1 so we have to query the save with the game id in saves route.
+    - Make a special exception for biscuit for the anticheat.
+    - If we attempt to update a save that doesn't exist, we just create it then and there.
+    - Shareable game stats is broken for now, though I will try to fix it later on.
