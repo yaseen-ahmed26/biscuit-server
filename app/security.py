@@ -92,7 +92,7 @@ async def set_cookies(user_id: int, response: Response):
         httponly = True,
         samesite = "none",
         path = "/",
-        max_age = refresh_token_expires
+        expires = refresh_token_expires
     )
 
     response.set_cookie(        
