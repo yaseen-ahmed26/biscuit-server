@@ -2,7 +2,8 @@
 ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5173",
-    "https://yaseen-ahmed26.github.io"
+    "https://yaseen-ahmed26.github.io",
+    "https://peck.projecthatchlings.xyz"
 ]
 
 # users.py, models.py
